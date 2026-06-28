@@ -1,22 +1,18 @@
--- ========================================================
--- RADIO NGỌT 🍭 | FULL VERSION
--- MADE BY KHANG & GEMINI
--- ========================================================
-
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 local VirtualInputManager = game:GetService("VirtualInputManager")
+local UserInputService = game:GetService("UserInputService")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
+local Camera = workspace.CurrentCamera
 local localPlayer = Players.LocalPlayer
 
 local Window = Rayfield:CreateWindow({
    Name = "Radio Ngọt 🍭 | Full Version",
-   LoadingTitle = "Đang khởi động hệ thống...",
+   LoadingTitle = "Đang tải hệ thống...",
    LoadingSubtitle = "By Khang & Gemini",
    ConfigurationSaving = { Enabled = false }
 })
 
--- ================= HÀM HỖ TRỢ =================
 local function GetPlayerNames()
     local names = {}
     for _, player in pairs(Players:GetPlayers()) do
@@ -25,101 +21,81 @@ local function GetPlayerNames()
     return names
 end
 
--- ================= TAB 1: STAND =================
 local Stand_Tab = Window:CreateTab("Stand", 4483362458)
 local standTarget = ""
 local standPosition = "Bên Trái"
 local isStandActive = false
 local isAttacking = false
 local lockedSkillPos = nil
+local pointerGui = nil
 
-Stand_Tab:CreateDropdown({
-   Name = "Chọn Đồng Đội", Options = GetPlayerNames(),
-   Callback = function(Option) standTarget = Option end
-})
-
-Stand_Tab:CreateDropdown({
-   Name = "Vị trí Stand", Options = {"Bên Trái", "Bên Phải", "Đằng Sau"},
-   Callback = function(Option) standPosition = Option end
-})
-
-Stand_Tab:CreateToggle({
-   Name = "Bật Stand",
-   Callback = function(Value)
-      isStandActive = Value
-      if Value then
-         RunService.Heartbeat:Connect(function()
+Stand_Tab:CreateDropdown({Name = "Chọn Đồng Đội", Options = GetPlayerNames(), Callback = function(O) standTarget = typeof(O) == "table" and O[1] or O end})
+Stand_Tab:CreateDropdown({Name = "Vị trí Stand", Options = {"Bên Trái", "Bên Phải", "Đằng Sau"}, Callback = function(O) standPosition = typeof(O) == "table" and O[1] or O end})
+Stand_Tab:CreateToggle({Name = "Kích hoạt Stand", Callback = function(V)
+    isStandActive = V
+    if V then
+        RunService.Heartbeat:Connect(function()
             if not isStandActive or standTarget == "" then return end
-            local targetHRP = Players[standTarget].Character and Players[standTarget].Character:FindFirstChild("HumanoidRootPart")
-            local myHRP = localPlayer.Character and localPlayer.Character:FindFirstChild("HumanoidRootPart")
-            if targetHRP and myHRP then
-               local offset = isAttacking and CFrame.new(0, 0, -4) or (standPosition == "Bên Trái" and CFrame.new(-4,0,0) or standPosition == "Bên Phải" and CFrame.new(4,0,0) or CFrame.new(0,0,3))
-               myHRP.CFrame = myHRP.CFrame:Lerp(targetHRP.CFrame * offset, 0.2)
+            local target = Players:FindFirstChild(standTarget)
+            if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
+                local offset = isAttacking and CFrame.new(0, 0, -4) or (standPosition == "Bên Trái" and CFrame.new(-4,0,0) or standPosition == "Bên Phải" and CFrame.new(4,0,0) or CFrame.new(0,0,3))
+                localPlayer.Character.HumanoidRootPart.CFrame = localPlayer.Character.HumanoidRootPart.CFrame:Lerp(target.Character.HumanoidRootPart.CFrame * offset, 0.2)
             end
-         end)
-      end
-   end
-})
+        end)
+    end
+end})
 
-Stand_Tab:CreateButton({
-   Name = "💥 Xuất chiêu bảo vệ",
-   Callback = function()
-      if not lockedSkillPos then return Rayfield:Notify({Title="Lỗi", Content="Chưa khóa vị trí skill!"}) end
-      isAttacking = true
-      task.wait(0.2)
-      VirtualInputManager:SendMouseButtonEvent(lockedSkillPos.X, lockedSkillPos.Y, 0, true, game, 1)
-      task.wait(0.1)
-      VirtualInputManager:SendMouseButtonEvent(lockedSkillPos.X, lockedSkillPos.Y, 0, false, game, 1)
-      task.wait(1)
-      isAttacking = false
-   end
-})
+Stand_Tab:CreateButton({Name = "1. Hiện cục đặt Skill", Callback = function()
+    if pointerGui then pointerGui:Destroy() end
+    pointerGui = Instance.new("ScreenGui", game.CoreGui)
+    local f = Instance.new("Frame", pointerGui)
+    f.Size = UDim2.new(0, 50, 0, 50); f.Position = UDim2.new(0.5, -25, 0.5, -25); f.BackgroundColor3 = Color3.new(1,0,0); f.Active = true; f.Draggable = true
+    f.Name = "SkillNode"
+end})
 
--- ================= TAB 2: ESP =================
+Stand_Tab:CreateButton({Name = "2. Khóa vị trí & Xuất chiêu", Callback = function()
+    local node = game.CoreGui:FindFirstChild("SkillNode", true)
+    if node then
+        lockedSkillPos = {X = node.AbsolutePosition.X + 25, Y = node.AbsolutePosition.Y + 25}
+        isAttacking = true
+        VirtualInputManager:SendMouseButtonEvent(lockedSkillPos.X, lockedSkillPos.Y, 0, true, game, 1)
+        task.wait(0.1)
+        VirtualInputManager:SendMouseButtonEvent(lockedSkillPos.X, lockedSkillPos.Y, 0, false, game, 1)
+        task.wait(1)
+        isAttacking = false
+    end
+end})
+
 local ESP_Tab = Window:CreateTab("ESP", 4483362458)
 local espEnabled = false
-local function CreateESP(p)
-    local h = Instance.new("Highlight", p.Character)
-    h.FillTransparency = 0.5
-    local bg = Instance.new("BillboardGui", p.Character.Head)
-    bg.Size = UDim2.new(0, 200, 0, 50)
-    local t = Instance.new("TextLabel", bg)
-    t.Text = p.Name
-end
-ESP_Tab:CreateToggle({Name = "Bật ESP", Callback = function(v) espEnabled = v end})
-
--- ================= TAB 3: BAY =================
-local Bay_Tab = Window:CreateTab("Bay", 4483362458)
-Bay_Tab:CreateToggle({
-   Name = "Bay Bám Mục Tiêu",
-   Callback = function(v)
-       if v then
-           RunService.Heartbeat:Connect(function()
-               local target = Players:FindFirstChild(standTarget)
-               if target and target.Character then
-                   localPlayer.Character.HumanoidRootPart.CFrame = target.Character.HumanoidRootPart.CFrame
-               end
-           end)
-       end
-   end
-})
-
--- ================= TAB 4: FLING =================
-local Fling_Tab = Window:CreateTab("Fling", 4483362458)
-Fling_Tab:CreateDropdown({
-    Name = "Chọn mục tiêu Fling", Options = GetPlayerNames(),
-    Callback = function(o) standTarget = o end
-})
-Fling_Tab:CreateButton({
-    Name = "🚀 Fling Target",
-    Callback = function()
-        local target = Players[standTarget]
-        local hrp = localPlayer.Character.HumanoidRootPart
-        local v = Instance.new("BodyVelocity", hrp)
-        v.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-        v.Velocity = Vector3.new(9e9, 9e9, 9e9)
-        task.wait(0.1)
-        v:Destroy()
+ESP_Tab:CreateToggle({Name = "Bật ESP", Callback = function(V) espEnabled = V end})
+RunService.RenderStepped:Connect(function()
+    if not espEnabled then return end
+    for _, p in pairs(Players:GetPlayers()) do
+        if p ~= localPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+            local h = p.Character:FindFirstChild("Highlight") or Instance.new("Highlight", p.Character)
+            h.Enabled = true
+        end
     end
-})
+end)
 
+local Fly_Tab = Window:CreateTab("Bay", 4483362458)
+local flyActive = false
+Fly_Tab:CreateToggle({Name = "Bật Bay Bám", Callback = function(V) flyActive = V end})
+RunService.Heartbeat:Connect(function()
+    if flyActive and standTarget ~= "" then
+        local target = Players:FindFirstChild(standTarget)
+        if target and target.Character then
+            localPlayer.Character.HumanoidRootPart.CFrame = target.Character.HumanoidRootPart.CFrame
+        end
+    end
+end)
+
+local Fling_Tab = Window:CreateTab("Fling", 4483362458)
+Fling_Tab:CreateButton({Name = "Fling Mục Tiêu", Callback = function()
+    local t = Players:FindFirstChild(standTarget)
+    if t and t.Character then
+        local v = Instance.new("BodyVelocity", localPlayer.Character.HumanoidRootPart)
+        v.Velocity = Vector3.new(9e9, 9e9, 9e9); task.wait(0.1); v:Destroy()
+    end
+end})
