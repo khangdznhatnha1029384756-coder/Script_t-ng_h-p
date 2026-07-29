@@ -1,101 +1,226 @@
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
-local VirtualInputManager = game:GetService("VirtualInputManager")
-local UserInputService = game:GetService("UserInputService")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local Camera = workspace.CurrentCamera
 local localPlayer = Players.LocalPlayer
 
 local Window = Rayfield:CreateWindow({
-   Name = "Radio Ngọt 🍭 | Full Version",
-   LoadingTitle = "Đang tải hệ thống...",
-   LoadingSubtitle = "By Khang & Gemini",
+   Name = "Radio Ngọt 🍭",
+   LoadingTitle = "Bản chính thức",
+   LoadingSubtitle = "By Khang",
    ConfigurationSaving = { Enabled = false }
 })
 
 local function GetPlayerNames()
     local names = {}
-    for _, player in pairs(Players:GetPlayers()) do
-        if player ~= localPlayer then table.insert(names, player.Name) end
+    for _, p in pairs(Players:GetPlayers()) do 
+        if p ~= localPlayer then table.insert(names, p.Name) end
     end
     return names
 end
 
-local Stand_Tab = Window:CreateTab("Stand", 4483362458)
-local standTarget = ""
-local standPosition = "Bên Trái"
-local isStandActive = false
-local isAttacking = false
-local lockedSkillPos = nil
-local pointerGui = nil
+-- ================= HỆ THỐNG CHỐNG XUNG ĐỘT =================
+local activeMode = "None" 
+local activeConnection = nil
 
-Stand_Tab:CreateDropdown({Name = "Chọn Đồng Đội", Options = GetPlayerNames(), Callback = function(O) standTarget = typeof(O) == "table" and O[1] or O end})
-Stand_Tab:CreateDropdown({Name = "Vị trí Stand", Options = {"Bên Trái", "Bên Phải", "Đằng Sau"}, Callback = function(O) standPosition = typeof(O) == "table" and O[1] or O end})
-Stand_Tab:CreateToggle({Name = "Kích hoạt Stand", Callback = function(V)
-    isStandActive = V
+local function StopAllModes()
+    if activeConnection then activeConnection:Disconnect(); activeConnection = nil end
+    local myChar = localPlayer.Character
+    if myChar and myChar:FindFirstChild("HumanoidRootPart") then
+        local hrp = myChar.HumanoidRootPart
+        if hrp:FindFirstChild("FlingSpin") then hrp.FlingSpin:Destroy() end
+        hrp.Velocity = Vector3.new(0,0,0)
+        hrp.RotVelocity = Vector3.new(0,0,0)
+    end
+    activeMode = "None"
+end
+
+local function SetMode(newMode)
+    if activeMode ~= "None" and activeMode ~= newMode then
+        Rayfield:Notify({Title = "🔄 Chuyển đổi", Content = "Đã tắt [" .. activeMode .. "] để chạy [" .. newMode .. "]", Duration = 2})
+    end
+    StopAllModes()
+    activeMode = newMode
+end
+
+-- ================= TAB 1: ESP FULL =================
+local ESP_Tab = Window:CreateTab("👁️ ESP", 4483362458)
+
+local ESP_Enabled, showBox, showName, showTracer = false, true, true, true
+local espColor = Color3.fromRGB(255, 105, 180) 
+local rainbowESP, rainbowHue = false, 0
+local esp_Objects = {}
+
+local function UpdateESPVisibility()
+    for _, data in pairs(esp_Objects) do
+        if data.highlight then data.highlight.Enabled = ESP_Enabled and showBox; data.highlight.FillColor = espColor end
+        if data.billboard then data.billboard.Enabled = ESP_Enabled and showName; data.billboard.TextLabel.TextColor3 = espColor end
+        if data.tracer then data.tracer.Visible = ESP_Enabled and showTracer; data.tracer.Color = espColor end
+    end
+end
+
+local function CreateESP(player)
+    if player == localPlayer or esp_Objects[player] then return end
+    local data = {}
+    
+    data.highlight = Instance.new("Highlight")
+    data.highlight.FillTransparency = 0.5
+    data.highlight.OutlineTransparency = 0
+    data.highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop 
+    
+    data.billboard = Instance.new("BillboardGui")
+    data.billboard.AlwaysOnTop = true; data.billboard.Size = UDim2.new(0, 200, 0, 50); data.billboard.StudsOffset = Vector3.new(0, 3, 0)
+    local txt = Instance.new("TextLabel", data.billboard)
+    txt.BackgroundTransparency = 1; txt.Size = UDim2.new(1, 0, 1, 0)
+    txt.Font = Enum.Font.GothamBold; txt.TextSize = 14; txt.TextStrokeTransparency = 0; txt.Text = player.Name
+    
+    data.tracer = Drawing.new("Line")
+    data.tracer.Thickness = 2; data.tracer.Transparency = 1
+
+    local function setupChar(char)
+        if char then
+            data.highlight.Parent = char; data.highlight.Adornee = char
+            if char:WaitForChild("Head", 5) then data.billboard.Parent = char.Head end
+        end
+    end
+    data.charAddedConn = player.CharacterAdded:Connect(setupChar)
+    if player.Character then setupChar(player.Character) end
+
+    data.renderConn = RunService.RenderStepped:Connect(function()
+        if ESP_Enabled and showTracer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            local vector, onScreen = Camera:WorldToViewportPoint(player.Character.HumanoidRootPart.Position)
+            if onScreen then
+                data.tracer.From = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y)
+                data.tracer.To = Vector2.new(vector.X, vector.Y)
+                data.tracer.Visible = true
+            else
+                data.tracer.Visible = false
+            end
+        else
+            data.tracer.Visible = false
+        end
+    end)
+    esp_Objects[player] = data
+end
+
+local function RemoveESP(player)
+    if esp_Objects[player] then
+        if esp_Objects[player].highlight then esp_Objects[player].highlight:Destroy() end
+        if esp_Objects[player].billboard then esp_Objects[player].billboard:Destroy() end
+        if esp_Objects[player].tracer then esp_Objects[player].tracer:Remove() end
+        if esp_Objects[player].charAddedConn then esp_Objects[player].charAddedConn:Disconnect() end
+        if esp_Objects[player].renderConn then esp_Objects[player].renderConn:Disconnect() end
+        esp_Objects[player] = nil
+    end
+end
+
+RunService.Heartbeat:Connect(function(dt)
+    if ESP_Enabled and rainbowESP then
+        rainbowHue = (rainbowHue + (dt * 0.2)) % 1
+        espColor = Color3.fromHSV(rainbowHue, 1, 1)
+        UpdateESPVisibility()
+    end
+end)
+
+ESP_Tab:CreateToggle({ Name = "Bật ESP", Callback = function(v) 
+    ESP_Enabled = v
+    if v then for _, p in pairs(Players:GetPlayers()) do CreateESP(p) end 
+    else for _, p in pairs(Players:GetPlayers()) do RemoveESP(p) end end
+    UpdateESPVisibility() 
+end})
+ESP_Tab:CreateToggle({ Name = "Hiện Box 3D", CurrentValue = true, Callback = function(v) showBox = v; UpdateESPVisibility() end })
+ESP_Tab:CreateToggle({ Name = "Hiện Tên", CurrentValue = true, Callback = function(v) showName = v; UpdateESPVisibility() end })
+ESP_Tab:CreateToggle({ Name = "Hiện Dây Chỉ Địch (Tracers)", CurrentValue = true, Callback = function(v) showTracer = v; UpdateESPVisibility() end })
+ESP_Tab:CreateToggle({ Name = "Tự động đổi màu (Rainbow)", CurrentValue = false, Callback = function(v) rainbowESP = v end })
+ESP_Tab:CreateColorPicker({ Name = "Chỉnh Màu ESP", Color = espColor, Callback = function(v) espColor = v; UpdateESPVisibility() end })
+
+Players.PlayerAdded:Connect(function(p) if ESP_Enabled then CreateESP(p) end end)
+Players.PlayerRemoving:Connect(RemoveESP)
+
+-- ================= TAB 2: BAY (FLY LOCK-ON) =================
+local Fly_Tab = Window:CreateTab("✈️ Bay (Lock-on)", 4483362458)
+local flyTarget, flyStyle, flyDist, flySpeed = "", "Bay vòng tròn", 5, 15
+
+local FlyDropdown = Fly_Tab:CreateDropdown({Name = "👤 Chọn Mục Tiêu", Options = GetPlayerNames(), Callback = function(O) flyTarget = typeof(O) == "table" and O[1] or O end})
+Fly_Tab:CreateButton({ Name = "🔄 Cập nhật người mới vô game", Callback = function() FlyDropdown:Refresh(GetPlayerNames()) end })
+
+Fly_Tab:CreateDropdown({Name = "📍 Kiểu Bay", Options = {"Bay vòng tròn", "Trên đầu", "Bám gót"}, Callback = function(O) flyStyle = typeof(O) == "table" and O[1] or O end})
+
+Fly_Tab:CreateInput({
+   Name = "Khoảng cách bay (Nhập số)",
+   PlaceholderText = "Đang mặc định là: 5",
+   RemoveTextAfterFocusLost = false,
+   Callback = function(Text)
+       local num = tonumber(Text)
+       if num then 
+           flyDist = num 
+           Rayfield:Notify({Title = "Đã lưu", Content = "Khoảng cách bay thành: " .. num, Duration = 2})
+       end
+   end,
+})
+
+Fly_Tab:CreateInput({
+   Name = "Tốc độ bay vòng tròn (Nhập số)",
+   PlaceholderText = "Đang mặc định là: 15",
+   RemoveTextAfterFocusLost = false,
+   Callback = function(Text)
+       local num = tonumber(Text)
+       if num then 
+           flySpeed = num 
+           Rayfield:Notify({Title = "Đã lưu", Content = "Tốc độ bay thành: " .. num, Duration = 2})
+       end
+   end,
+})
+
+Fly_Tab:CreateToggle({Name = "🟢 Bật Fly Lock-on", Callback = function(V)
     if V then
-        RunService.Heartbeat:Connect(function()
-            if not isStandActive or standTarget == "" then return end
-            local target = Players:FindFirstChild(standTarget)
+        SetMode("Fly")
+        local angle = 0
+        activeConnection = RunService.Heartbeat:Connect(function()
+            local target = Players:FindFirstChild(flyTarget)
             if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
-                local offset = isAttacking and CFrame.new(0, 0, -4) or (standPosition == "Bên Trái" and CFrame.new(-4,0,0) or standPosition == "Bên Phải" and CFrame.new(4,0,0) or CFrame.new(0,0,3))
-                localPlayer.Character.HumanoidRootPart.CFrame = localPlayer.Character.HumanoidRootPart.CFrame:Lerp(target.Character.HumanoidRootPart.CFrame * offset, 0.2)
+                local tPos = target.Character.HumanoidRootPart.Position
+                local goalCF = CFrame.new(tPos)
+                if flyStyle == "Trên đầu" then goalCF = CFrame.new(tPos + Vector3.new(0, flyDist, 0))
+                elseif flyStyle == "Bám gót" then goalCF = target.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, flyDist)
+                elseif flyStyle == "Bay vòng tròn" then
+                    angle = angle + math.rad(flySpeed)
+                    goalCF = CFrame.new(tPos + Vector3.new(math.cos(angle)*flyDist, 0, math.sin(angle)*flyDist))
+                end
+                localPlayer.Character.HumanoidRootPart.CFrame = localPlayer.Character.HumanoidRootPart.CFrame:Lerp(goalCF, 0.15)
             end
         end)
+    else
+        if activeMode == "Fly" then StopAllModes() end
     end
 end})
+Fly_Tab:CreateButton({Name = "🛑 Tắt/Reset Fly Khẩn Cấp", Callback = function() StopAllModes() end})
 
-Stand_Tab:CreateButton({Name = "1. Hiện cục đặt Skill", Callback = function()
-    if pointerGui then pointerGui:Destroy() end
-    pointerGui = Instance.new("ScreenGui", game.CoreGui)
-    local f = Instance.new("Frame", pointerGui)
-    f.Size = UDim2.new(0, 50, 0, 50); f.Position = UDim2.new(0.5, -25, 0.5, -25); f.BackgroundColor3 = Color3.new(1,0,0); f.Active = true; f.Draggable = true
-    f.Name = "SkillNode"
-end})
+-- ================= TAB 3: FLING (LOCK-ON) =================
+local Fling_Tab = Window:CreateTab("🌪️ Fling", 4483362458)
+local flingTarget = ""
 
-Stand_Tab:CreateButton({Name = "2. Khóa vị trí & Xuất chiêu", Callback = function()
-    local node = game.CoreGui:FindFirstChild("SkillNode", true)
-    if node then
-        lockedSkillPos = {X = node.AbsolutePosition.X + 25, Y = node.AbsolutePosition.Y + 25}
-        isAttacking = true
-        VirtualInputManager:SendMouseButtonEvent(lockedSkillPos.X, lockedSkillPos.Y, 0, true, game, 1)
-        task.wait(0.1)
-        VirtualInputManager:SendMouseButtonEvent(lockedSkillPos.X, lockedSkillPos.Y, 0, false, game, 1)
-        task.wait(1)
-        isAttacking = false
-    end
-end})
+local FlingDropdown = Fling_Tab:CreateDropdown({Name = "👤 Chọn Mục Tiêu Fling", Options = GetPlayerNames(), Callback = function(O) flingTarget = typeof(O) == "table" and O[1] or O end})
+Fling_Tab:CreateButton({ Name = "🔄 Cập nhật người mới vô game", Callback = function() FlingDropdown:Refresh(GetPlayerNames()) end })
 
-local ESP_Tab = Window:CreateTab("ESP", 4483362458)
-local espEnabled = false
-ESP_Tab:CreateToggle({Name = "Bật ESP", Callback = function(V) espEnabled = V end})
-RunService.RenderStepped:Connect(function()
-    if not espEnabled then return end
-    for _, p in pairs(Players:GetPlayers()) do
-        if p ~= localPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
-            local h = p.Character:FindFirstChild("Highlight") or Instance.new("Highlight", p.Character)
-            h.Enabled = true
+Fling_Tab:CreateToggle({Name = "🚀 Kích Hoạt Fling Bám Đuổi (Lock-on)", Callback = function(V)
+    if V then
+        SetMode("Fling")
+        local hrp = localPlayer.Character and localPlayer.Character:FindFirstChild("HumanoidRootPart")
+        if hrp then
+            local spin = Instance.new("BodyAngularVelocity", hrp)
+            spin.Name = "FlingSpin"; spin.AngularVelocity = Vector3.new(0, 99999, 0); spin.MaxTorque = Vector3.new(0, math.huge, 0)
+            
+            activeConnection = RunService.Heartbeat:Connect(function()
+                local target = Players:FindFirstChild(flingTarget)
+                if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
+                    hrp.CFrame = target.Character.HumanoidRootPart.CFrame
+                    hrp.Velocity = Vector3.new(0,0,0) 
+                end
+            end)
         end
-    end
-end)
-
-local Fly_Tab = Window:CreateTab("Bay", 4483362458)
-local flyActive = false
-Fly_Tab:CreateToggle({Name = "Bật Bay Bám", Callback = function(V) flyActive = V end})
-RunService.Heartbeat:Connect(function()
-    if flyActive and standTarget ~= "" then
-        local target = Players:FindFirstChild(standTarget)
-        if target and target.Character then
-            localPlayer.Character.HumanoidRootPart.CFrame = target.Character.HumanoidRootPart.CFrame
-        end
-    end
-end)
-
-local Fling_Tab = Window:CreateTab("Fling", 4483362458)
-Fling_Tab:CreateButton({Name = "Fling Mục Tiêu", Callback = function()
-    local t = Players:FindFirstChild(standTarget)
-    if t and t.Character then
-        local v = Instance.new("BodyVelocity", localPlayer.Character.HumanoidRootPart)
-        v.Velocity = Vector3.new(9e9, 9e9, 9e9); task.wait(0.1); v:Destroy()
+    else
+        if activeMode == "Fling" then StopAllModes() end
     end
 end})
+Fling_Tab:CreateButton({Name = "🛑 Dừng Fling Khẩn Cấp", Callback = function() StopAllModes() end})
