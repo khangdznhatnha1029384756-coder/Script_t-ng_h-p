@@ -1,25 +1,25 @@
-local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
-local Players = game:GetService("Players")
+local CoreGui = game:GetService("CoreGui")
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
-local Camera = workspace.CurrentCamera
+local Players = game:GetService("Players")
 local localPlayer = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
 
-local Window = Rayfield:CreateWindow({
-   Name = "Radio Ngọt 🍭",
-   LoadingTitle = "Bản chính thức",
-   LoadingSubtitle = "By Khang",
-   ConfigurationSaving = { Enabled = false }
-})
-
-local function GetPlayerNames()
-    local names = {}
-    for _, p in pairs(Players:GetPlayers()) do 
-        if p ~= localPlayer then table.insert(names, p.Name) end
+-- ==========================================
+-- 1. TỐI ƯU HÓA (GIẢM LAG & NETWORK OWNER)
+-- ==========================================
+local function FixLag()
+    localPlayer.MaximumSimulationRadius = 1000
+    localPlayer.SimulationRadius = 1000
+    if localPlayer.Character and localPlayer.Character:FindFirstChild("HumanoidRootPart") then
+        localPlayer.Character.HumanoidRootPart:SetNetworkOwner(localPlayer)
     end
-    return names
 end
 
--- ================= HỆ THỐNG CHỐNG XUNG ĐỘT =================
+-- ==========================================
+-- 2. HỆ THỐNG QUẢN LÝ CHẾ ĐỘ
+-- ==========================================
 local activeMode = "None" 
 local activeConnection = nil
 
@@ -36,25 +36,82 @@ local function StopAllModes()
 end
 
 local function SetMode(newMode)
-    if activeMode ~= "None" and activeMode ~= newMode then
-        Rayfield:Notify({Title = "🔄 Chuyển đổi", Content = "Đã tắt [" .. activeMode .. "] để chạy [" .. newMode .. "]", Duration = 2})
-    end
     StopAllModes()
     activeMode = newMode
 end
 
--- ================= TAB 1: ESP FULL =================
-local ESP_Tab = Window:CreateTab("👁️ ESP", 4483362458)
+local function GetPlayerNames()
+    local names = {}
+    for _, p in pairs(Players:GetPlayers()) do 
+        if p ~= localPlayer then table.insert(names, p.Name) end
+    end
+    return names
+end
 
+-- ==========================================
+-- 3. TẠO NÚT LOGO TRÒN "LONELY HUB"
+-- ==========================================
+local LovenlyGui = Instance.new("ScreenGui")
+LovenlyGui.Name = "LonelyHub_Toggle"
+LovenlyGui.Parent = CoreGui
+LovenlyGui.ResetOnSpawn = false
+
+local ToggleButton = Instance.new("ImageButton")
+ToggleButton.Parent = LovenlyGui
+ToggleButton.Size = UDim2.new(0, 50, 0, 50)
+ToggleButton.Position = UDim2.new(0.1, 0, 0.1, 0)
+ToggleButton.Image = "rbxassetid://135835923984628" 
+ToggleButton.BackgroundTransparency = 1
+ToggleButton.ClipsDescendants = true
+local UICorner = Instance.new("UICorner"); UICorner.CornerRadius = UDim.new(1, 0); UICorner.Parent = ToggleButton
+
+local dragging, dragInput, dragStart, startPos
+ToggleButton.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true; dragStart = input.Position; startPos = ToggleButton.Position
+    end
+end)
+UserInputService.InputChanged:Connect(function(input)
+    if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        local delta = input.Position - dragStart
+        ToggleButton.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+end)
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then dragging = false end
+end)
+
+-- ==========================================
+-- 4. KHỞI TẠO FLUENT UI
+-- ==========================================
+local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
+local Window = Fluent:CreateWindow({
+    Title = "Lonely Hub", SubTitle = "Premium Edition - By Khang",
+    TabWidth = 160, Size = UDim2.fromOffset(580, 460), Acrylic = true, Theme = "Dark", MinimizeKey = Enum.KeyCode.LeftControl
+})
+
+ToggleButton.MouseButton1Click:Connect(function() Window:Minimize() end)
+
+local Tabs = {
+    ESP = Window:AddTab({ Title = "ESP", Icon = "eye" }),
+    Aimbot = Window:AddTab({ Title = "Aimbot", Icon = "target" }),
+    Fly = Window:AddTab({ Title = "Fly Lock-on", Icon = "plane" }),
+    Fling = Window:AddTab({ Title = "Fling", Icon = "zap" }),
+    Settings = Window:AddTab({ Title = "Cài Đặt UI & Lag", Icon = "settings" })
+}
+
+-- ==========================================
+-- TAB ESP (Đầy đủ Máu, Tên, Box, Tracer, Rainbow)
+-- ==========================================
 local ESP_Enabled, showBox, showName, showTracer = false, true, true, true
-local espColor = Color3.fromRGB(255, 105, 180) 
+local espColor = Color3.fromRGB(255, 105, 180)
 local rainbowESP, rainbowHue = false, 0
 local esp_Objects = {}
 
 local function UpdateESPVisibility()
     for _, data in pairs(esp_Objects) do
         if data.highlight then data.highlight.Enabled = ESP_Enabled and showBox; data.highlight.FillColor = espColor end
-        if data.billboard then data.billboard.Enabled = ESP_Enabled and showName; data.billboard.TextLabel.TextColor3 = espColor end
+        if data.billboard then data.billboard.Enabled = ESP_Enabled and showName end
         if data.tracer then data.tracer.Visible = ESP_Enabled and showTracer; data.tracer.Color = espColor end
     end
 end
@@ -64,15 +121,19 @@ local function CreateESP(player)
     local data = {}
     
     data.highlight = Instance.new("Highlight")
-    data.highlight.FillTransparency = 0.5
-    data.highlight.OutlineTransparency = 0
+    data.highlight.FillTransparency = 0.5; data.highlight.OutlineTransparency = 0
     data.highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop 
     
     data.billboard = Instance.new("BillboardGui")
-    data.billboard.AlwaysOnTop = true; data.billboard.Size = UDim2.new(0, 200, 0, 50); data.billboard.StudsOffset = Vector3.new(0, 3, 0)
-    local txt = Instance.new("TextLabel", data.billboard)
-    txt.BackgroundTransparency = 1; txt.Size = UDim2.new(1, 0, 1, 0)
-    txt.Font = Enum.Font.GothamBold; txt.TextSize = 14; txt.TextStrokeTransparency = 0; txt.Text = player.Name
+    data.billboard.AlwaysOnTop = true; data.billboard.Size = UDim2.new(0, 200, 0, 40); data.billboard.StudsOffset = Vector3.new(0, 3, 0)
+    
+    data.nameTxt = Instance.new("TextLabel", data.billboard)
+    data.nameTxt.BackgroundTransparency = 1; data.nameTxt.Size = UDim2.new(1, 0, 0.5, 0)
+    data.nameTxt.Font = Enum.Font.GothamBold; data.nameTxt.TextSize = 14; data.nameTxt.TextStrokeTransparency = 0; data.nameTxt.TextColor3 = espColor; data.nameTxt.Text = player.Name
+    
+    data.hpTxt = Instance.new("TextLabel", data.billboard)
+    data.hpTxt.BackgroundTransparency = 1; data.hpTxt.Size = UDim2.new(1, 0, 0.5, 0); data.hpTxt.Position = UDim2.new(0, 0, 0.5, 0)
+    data.hpTxt.Font = Enum.Font.GothamBold; data.hpTxt.TextSize = 12; data.hpTxt.TextStrokeTransparency = 0
     
     data.tracer = Drawing.new("Line")
     data.tracer.Thickness = 2; data.tracer.Transparency = 1
@@ -87,18 +148,21 @@ local function CreateESP(player)
     if player.Character then setupChar(player.Character) end
 
     data.renderConn = RunService.RenderStepped:Connect(function()
-        if ESP_Enabled and showTracer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-            local vector, onScreen = Camera:WorldToViewportPoint(player.Character.HumanoidRootPart.Position)
-            if onScreen then
-                data.tracer.From = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y)
-                data.tracer.To = Vector2.new(vector.X, vector.Y)
-                data.tracer.Visible = true
-            else
-                data.tracer.Visible = false
-            end
-        else
-            data.tracer.Visible = false
-        end
+        if not ESP_Enabled then data.tracer.Visible = false; return end
+        if player.Character and player.Character:FindFirstChild("HumanoidRootPart") and player.Character:FindFirstChild("Humanoid") then
+            local hum = player.Character.Humanoid
+            data.hpTxt.Text = "HP: " .. math.floor(hum.Health)
+            if hum.Health > (hum.MaxHealth * 0.5) then data.hpTxt.TextColor3 = Color3.fromRGB(0, 255, 0) else data.hpTxt.TextColor3 = Color3.fromRGB(255, 0, 0) end
+            
+            if showTracer then
+                local vector, onScreen = Camera:WorldToViewportPoint(player.Character.HumanoidRootPart.Position)
+                if onScreen then
+                    data.tracer.From = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y)
+                    data.tracer.To = Vector2.new(vector.X, vector.Y)
+                    data.tracer.Visible = true
+                else data.tracer.Visible = false end
+            else data.tracer.Visible = false end
+        else data.tracer.Visible = false end
     end)
     esp_Objects[player] = data
 end
@@ -118,65 +182,76 @@ RunService.Heartbeat:Connect(function(dt)
     if ESP_Enabled and rainbowESP then
         rainbowHue = (rainbowHue + (dt * 0.2)) % 1
         espColor = Color3.fromHSV(rainbowHue, 1, 1)
+        for _, data in pairs(esp_Objects) do if data.nameTxt then data.nameTxt.TextColor3 = espColor end end
         UpdateESPVisibility()
     end
 end)
 
-ESP_Tab:CreateToggle({ Name = "Bật ESP", Callback = function(v) 
-    ESP_Enabled = v
-    if v then for _, p in pairs(Players:GetPlayers()) do CreateESP(p) end 
-    else for _, p in pairs(Players:GetPlayers()) do RemoveESP(p) end end
-    UpdateESPVisibility() 
-end})
-ESP_Tab:CreateToggle({ Name = "Hiện Box 3D", CurrentValue = true, Callback = function(v) showBox = v; UpdateESPVisibility() end })
-ESP_Tab:CreateToggle({ Name = "Hiện Tên", CurrentValue = true, Callback = function(v) showName = v; UpdateESPVisibility() end })
-ESP_Tab:CreateToggle({ Name = "Hiện Dây Chỉ Địch (Tracers)", CurrentValue = true, Callback = function(v) showTracer = v; UpdateESPVisibility() end })
-ESP_Tab:CreateToggle({ Name = "Tự động đổi màu (Rainbow)", CurrentValue = false, Callback = function(v) rainbowESP = v end })
-ESP_Tab:CreateColorPicker({ Name = "Chỉnh Màu ESP", Color = espColor, Callback = function(v) espColor = v; UpdateESPVisibility() end })
-
 Players.PlayerAdded:Connect(function(p) if ESP_Enabled then CreateESP(p) end end)
 Players.PlayerRemoving:Connect(RemoveESP)
 
--- ================= TAB 2: BAY (FLY LOCK-ON) =================
-local Fly_Tab = Window:CreateTab("✈️ Bay (Lock-on)", 4483362458)
+Tabs.ESP:AddToggle("ToggleESP", {Title = "Bật ESP", Default = false, Callback = function(v) 
+    ESP_Enabled = v
+    if v then for _, p in pairs(Players:GetPlayers()) do CreateESP(p) end else for _, p in pairs(Players:GetPlayers()) do RemoveESP(p) end end
+    UpdateESPVisibility() 
+end})
+Tabs.ESP:AddToggle("ToggleBox", {Title = "Hiện Box 3D", Default = true, Callback = function(v) showBox = v; UpdateESPVisibility() end})
+Tabs.ESP:AddToggle("ToggleName", {Title = "Hiện Tên & Máu", Default = true, Callback = function(v) showName = v; UpdateESPVisibility() end})
+Tabs.ESP:AddToggle("ToggleTracer", {Title = "Hiện Dây Tracer", Default = true, Callback = function(v) showTracer = v; UpdateESPVisibility() end})
+Tabs.ESP:AddToggle("ToggleRainbow", {Title = "Màu Cầu Vồng (Rainbow)", Default = false, Callback = function(v) rainbowESP = v end})
+Tabs.ESP:AddColorpicker("ColorESP", {Title = "Đổi Màu ESP", Default = espColor, Callback = function(v) espColor = v; UpdateESPVisibility() end})
+
+-- ==========================================
+-- TAB AIMBOT & FOV
+-- ==========================================
+local aimbotEnabled, showFOV = false, false
+local fovRadius, aimSmoothness, aimPart = 100, 1, "Head"
+local fovCircle = Drawing.new("Circle")
+fovCircle.Visible = false; fovCircle.Filled = false; fovCircle.Thickness = 1; fovCircle.Color = Color3.fromRGB(255, 255, 255)
+
+Tabs.Aimbot:AddToggle("TogAimbot", {Title = "Bật Aimbot", Default = false, Callback = function(v) aimbotEnabled = v end})
+Tabs.Aimbot:AddToggle("TogFOV", {Title = "Hiện Vòng FOV", Default = false, Callback = function(v) showFOV = v; fovCircle.Visible = v end})
+Tabs.Aimbot:AddSlider("FOVSize", {Title = "Kích Thước Vòng FOV", Default = 100, Min = 50, Max = 500, Rounding = 1, Callback = function(v) fovRadius = v; fovCircle.Radius = v end})
+Tabs.Aimbot:AddSlider("AimSmooth", {Title = "Độ Mượt (Smoothness)", Default = 1, Min = 1, Max = 10, Rounding = 1, Callback = function(v) aimSmoothness = v end})
+Tabs.Aimbot:AddDropdown("AimPart", {Title = "Vị trí ngắm", Values = {"Head", "HumanoidRootPart"}, Default = 1, Callback = function(v) aimPart = v end})
+
+RunService.RenderStepped:Connect(function()
+    fovCircle.Position = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
+    if aimbotEnabled then
+        local target, shortestDist = nil, fovRadius
+        local center = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
+        for _, p in pairs(Players:GetPlayers()) do
+            if p ~= localPlayer and p.Character and p.Character:FindFirstChild(aimPart) and p.Character:FindFirstChild("Humanoid") and p.Character.Humanoid.Health > 0 then
+                local pos, onScreen = Camera:WorldToViewportPoint(p.Character[aimPart].Position)
+                if onScreen then
+                    local mag = (Vector2.new(pos.X, pos.Y) - center).Magnitude
+                    if mag < shortestDist then target = p; shortestDist = mag end
+                end
+            end
+        end
+        if target then
+            local goalCFrame = CFrame.new(Camera.CFrame.Position, target.Character[aimPart].Position)
+            if aimSmoothness == 1 then Camera.CFrame = goalCFrame else Camera.CFrame = Camera.CFrame:Lerp(goalCFrame, 1 / aimSmoothness) end
+        end
+    end
+end)
+
+-- ==========================================
+-- TAB FLY LOCK-ON
+-- ==========================================
 local flyTarget, flyStyle, flyDist, flySpeed = "", "Bay vòng tròn", 5, 15
+local FlyDrop = Tabs.Fly:AddDropdown("FlyDrop", {Title = "Chọn Mục Tiêu", Values = GetPlayerNames(), Default = 1, Callback = function(v) flyTarget = v end})
+Tabs.Fly:AddButton({Title = "🔄 Cập nhật danh sách", Callback = function() FlyDrop:SetValues(GetPlayerNames()) end})
+Tabs.Fly:AddDropdown("FlyStyle", {Title = "Kiểu Bay", Values = {"Bay vòng tròn", "Trên đầu", "Bám gót"}, Default = 1, Callback = function(v) flyStyle = v end})
+Tabs.Fly:AddSlider("FlyDist", {Title = "Khoảng Cách", Default = 5, Min = 1, Max = 20, Rounding = 1, Callback = function(v) flyDist = v end})
+Tabs.Fly:AddSlider("FlySpeed", {Title = "Tốc Độ (Vòng tròn)", Default = 15, Min = 5, Max = 50, Rounding = 1, Callback = function(v) flySpeed = v end})
 
-local FlyDropdown = Fly_Tab:CreateDropdown({Name = "👤 Chọn Mục Tiêu", Options = GetPlayerNames(), Callback = function(O) flyTarget = typeof(O) == "table" and O[1] or O end})
-Fly_Tab:CreateButton({ Name = "🔄 Cập nhật người mới vô game", Callback = function() FlyDropdown:Refresh(GetPlayerNames()) end })
-
-Fly_Tab:CreateDropdown({Name = "📍 Kiểu Bay", Options = {"Bay vòng tròn", "Trên đầu", "Bám gót"}, Callback = function(O) flyStyle = typeof(O) == "table" and O[1] or O end})
-
-Fly_Tab:CreateInput({
-   Name = "Khoảng cách bay (Nhập số)",
-   PlaceholderText = "Đang mặc định là: 5",
-   RemoveTextAfterFocusLost = false,
-   Callback = function(Text)
-       local num = tonumber(Text)
-       if num then 
-           flyDist = num 
-           Rayfield:Notify({Title = "Đã lưu", Content = "Khoảng cách bay thành: " .. num, Duration = 2})
-       end
-   end,
-})
-
-Fly_Tab:CreateInput({
-   Name = "Tốc độ bay vòng tròn (Nhập số)",
-   PlaceholderText = "Đang mặc định là: 15",
-   RemoveTextAfterFocusLost = false,
-   Callback = function(Text)
-       local num = tonumber(Text)
-       if num then 
-           flySpeed = num 
-           Rayfield:Notify({Title = "Đã lưu", Content = "Tốc độ bay thành: " .. num, Duration = 2})
-       end
-   end,
-})
-
-Fly_Tab:CreateToggle({Name = "🟢 Bật Fly Lock-on", Callback = function(V)
+Tabs.Fly:AddToggle("TogFly", {Title = "🟢 Bật Fly Lock-on", Default = false, Callback = function(V)
     if V then
         SetMode("Fly")
         local angle = 0
         activeConnection = RunService.Heartbeat:Connect(function()
+            FixLag()
             local target = Players:FindFirstChild(flyTarget)
             if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
                 local tPos = target.Character.HumanoidRootPart.Position
@@ -187,40 +262,62 @@ Fly_Tab:CreateToggle({Name = "🟢 Bật Fly Lock-on", Callback = function(V)
                     angle = angle + math.rad(flySpeed)
                     goalCF = CFrame.new(tPos + Vector3.new(math.cos(angle)*flyDist, 0, math.sin(angle)*flyDist))
                 end
-                localPlayer.Character.HumanoidRootPart.CFrame = localPlayer.Character.HumanoidRootPart.CFrame:Lerp(goalCF, 0.15)
+                localPlayer.Character.HumanoidRootPart.CFrame = localPlayer.Character.HumanoidRootPart.CFrame:Lerp(goalCF, 0.25)
             end
         end)
-    else
-        if activeMode == "Fly" then StopAllModes() end
-    end
+    else if activeMode == "Fly" then StopAllModes() end end
 end})
-Fly_Tab:CreateButton({Name = "🛑 Tắt/Reset Fly Khẩn Cấp", Callback = function() StopAllModes() end})
 
--- ================= TAB 3: FLING (LOCK-ON) =================
-local Fling_Tab = Window:CreateTab("🌪️ Fling", 4483362458)
+-- ==========================================
+-- TAB FLING (CHỐNG KHỰNG)
+-- ==========================================
 local flingTarget = ""
+local FlingDrop = Tabs.Fling:AddDropdown("FlingDrop", {Title = "Chọn Mục Tiêu Fling", Values = GetPlayerNames(), Default = 1, Callback = function(v) flingTarget = v end})
+Tabs.Fling:AddButton({Title = "🔄 Cập nhật danh sách", Callback = function() FlingDrop:SetValues(GetPlayerNames()) end})
 
-local FlingDropdown = Fling_Tab:CreateDropdown({Name = "👤 Chọn Mục Tiêu Fling", Options = GetPlayerNames(), Callback = function(O) flingTarget = typeof(O) == "table" and O[1] or O end})
-Fling_Tab:CreateButton({ Name = "🔄 Cập nhật người mới vô game", Callback = function() FlingDropdown:Refresh(GetPlayerNames()) end })
-
-Fling_Tab:CreateToggle({Name = "🚀 Kích Hoạt Fling Bám Đuổi (Lock-on)", Callback = function(V)
+Tabs.Fling:AddToggle("TogFling", {Title = "🚀 Bật Fling Bám Đuổi", Default = false, Callback = function(V)
     if V then
         SetMode("Fling")
         local hrp = localPlayer.Character and localPlayer.Character:FindFirstChild("HumanoidRootPart")
         if hrp then
             local spin = Instance.new("BodyAngularVelocity", hrp)
             spin.Name = "FlingSpin"; spin.AngularVelocity = Vector3.new(0, 99999, 0); spin.MaxTorque = Vector3.new(0, math.huge, 0)
-            
             activeConnection = RunService.Heartbeat:Connect(function()
+                FixLag()
                 local target = Players:FindFirstChild(flingTarget)
                 if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
-                    hrp.CFrame = target.Character.HumanoidRootPart.CFrame
-                    hrp.Velocity = Vector3.new(0,0,0) 
+                    local offset = Vector3.new(math.random(-10,10)/10, math.random(-10,10)/10, math.random(-10,10)/10)
+                    hrp.CFrame = target.Character.HumanoidRootPart.CFrame * CFrame.new(offset)
+                    hrp.Velocity = Vector3.new(5000, 5000, 5000)
                 end
             end)
         end
+    else if activeMode == "Fling" then StopAllModes() end end
+end})
+Tabs.Fling:AddButton({Title = "🛑 Tắt Chế Độ Hiện Tại", Callback = function() StopAllModes() end})
+
+-- ==========================================
+-- TAB CÀI ĐẶT UI & TỐI ƯU (JERK)
+-- ==========================================
+Tabs.Settings:AddSlider("LogoSize", {Title = "Kích Thước Logo", Default = 50, Min = 30, Max = 120, Rounding = 1, Callback = function(Value)
+    TweenService:Create(ToggleButton, TweenInfo.new(0.2), {Size = UDim2.new(0, Value, 0, Value)}):Play()
+end})
+
+local JerkConnection
+Tabs.Settings:AddToggle("JerkToggle", {Title = "Bật Jerk Mode (Gồng)", Default = false, Callback = function(v)
+    if v then
+        local hrp = localPlayer.Character and localPlayer.Character:FindFirstChild("HumanoidRootPart")
+        if hrp then
+            local thrust = Instance.new("BodyThrust", hrp); thrust.Name = "JerkThrust"
+            JerkConnection = RunService.Heartbeat:Connect(function() thrust.Force = Vector3.new(math.random(-5000,5000), math.random(-5000,5000), math.random(-5000,5000)) end)
+        end
     else
-        if activeMode == "Fling" then StopAllModes() end
+        if JerkConnection then JerkConnection:Disconnect() end
+        if localPlayer.Character and localPlayer.Character:FindFirstChild("HumanoidRootPart") and localPlayer.Character.HumanoidRootPart:FindFirstChild("JerkThrust") then
+            localPlayer.Character.HumanoidRootPart.JerkThrust:Destroy()
+        end
     end
 end})
-Fling_Tab:CreateButton({Name = "🛑 Dừng Fling Khẩn Cấp", Callback = function() StopAllModes() end})
+
+Window:SelectTab(1)
+Fluent:Notify({Title = "Lonely Hub Đã Load", Content = "Tất cả tính năng đã sẵn sàng!", Duration = 5})
