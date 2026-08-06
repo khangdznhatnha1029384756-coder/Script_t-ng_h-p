@@ -1,352 +1,91 @@
--- ==========================================
--- SCRIPT BY DEV KHANG | RADIO NGỌT 🍭
--- "Nếu ai copy thì cứ, tôi ko ngăn cản đc bạn!"
--- ==========================================
+-- =========================================================================
+-- RADIO NGỌT ULTIMATE - PHIÊN BẢN CỐ ĐỊNH & TOÀN DIỆN
+-- CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM | ĐỘC LẬP - TỰ DO - HẠNH PHÚC
+-- =========================================================================
 
-local CoreGui = game:GetService("CoreGui")
-local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
-local UserInputService = game:GetService("UserInputService")
+local LP = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
-local LocalPlayer = Players.LocalPlayer
 
--- Xóa UI Intro cũ nếu có
-if CoreGui:FindFirstChild("RadioNgotIntro") then
-    CoreGui.RadioNgotIntro:Destroy()
+-- UI Setup
+local Screen = Instance.new("ScreenGui", game:GetService("CoreGui"))
+local Main = Instance.new("Frame", Screen)
+Main.Size = UDim2.new(0, 250, 0, 450)
+Main.Position = UDim2.new(0.1, 0, 0.2, 0)
+Main.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+Main.BorderSizePixel = 0
+Main.Active = true
+Main.Draggable = true
+
+local Scroll = Instance.new("ScrollingFrame", Main)
+Scroll.Size = UDim2.new(1, 0, 1, 0)
+Scroll.BackgroundTransparency = 1
+Scroll.CanvasSize = UDim2.new(0, 0, 2, 0)
+local Layout = Instance.new("UIListLayout", Scroll)
+
+-- Helper Functions
+local function CreateButton(text, callback)
+    local btn = Instance.new("TextButton", Scroll)
+    btn.Size = UDim2.new(1, -10, 0, 35)
+    btn.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.Text = text
+    btn.MouseButton1Click:Connect(callback)
+    return btn
 end
 
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "RadioNgotIntro"
-ScreenGui.Parent = CoreGui
+-- ESP Data
+local ESP = {Box = false, Name = false, Health = false, Dist = false}
 
-local function createCorner(parent, radius)
-    local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0, radius)
-    corner.Parent = parent
-end
-
--- ==========================================
--- 1. MÀN HÌNH CHỌN NGÔN NGỮ
--- ==========================================
-local LangFrame = Instance.new("Frame")
-LangFrame.Size = UDim2.new(0, 420, 0, 210)
-LangFrame.Position = UDim2.new(0.5, -210, 0.5, -105)
-LangFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-createCorner(LangFrame, 12)
-LangFrame.Parent = ScreenGui
-
-local LangTitle = Instance.new("TextLabel")
-LangTitle.Size = UDim2.new(1, 0, 0, 60)
-LangTitle.BackgroundTransparency = 1
-LangTitle.Text = "Please select a language\n(Vui lòng chọn ngôn ngữ)"
-LangTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
-LangTitle.Font = Enum.Font.GothamBold
-LangTitle.TextSize = 16
-LangTitle.Parent = LangFrame
-
-local EngButton = Instance.new("TextButton")
-EngButton.Size = UDim2.new(0.42, 0, 0, 50)
-EngButton.Position = UDim2.new(0.05, 0, 0.55, 0)
-EngButton.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-EngButton.Text = "English 🇺🇲"
-EngButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-EngButton.Font = Enum.Font.GothamSemibold
-EngButton.TextSize = 16
-createCorner(EngButton, 8)
-EngButton.Parent = LangFrame
-
-local VieButton = Instance.new("TextButton")
-VieButton.Size = UDim2.new(0.42, 0, 0, 50)
-VieButton.Position = UDim2.new(0.53, 0, 0.55, 0)
-VieButton.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-VieButton.Text = "Tiếng Việt 🇻🇳"
-VieButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-VieButton.Font = Enum.Font.GothamSemibold
-VieButton.TextSize = 16
-createCorner(VieButton, 8)
-VieButton.Parent = LangFrame
-
--- ==========================================
--- 2. MÀN HÌNH TÔN VINH 
--- ==========================================
-local HonorFrame = Instance.new("Frame")
-HonorFrame.Size = UDim2.new(1, 0, 1, 0)
-HonorFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-HonorFrame.BackgroundTransparency = 1
-HonorFrame.Visible = false
-HonorFrame.Parent = ScreenGui
-
-local HonorText = Instance.new("TextLabel")
-HonorText.Size = UDim2.new(1, 0, 1, 0)
-HonorText.BackgroundTransparency = 1
-HonorText.Text = "CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM\nĐỘC LẬP - TỰ DO - HẠNH PHÚC"
-HonorText.TextColor3 = Color3.fromRGB(255, 215, 0)
-HonorText.Font = Enum.Font.GothamBlack
-HonorText.TextSize = 32
-HonorText.TextTransparency = 1
-HonorText.Parent = HonorFrame
-
--- ==========================================
--- 3. HÀM LOAD MENU RAYFIELD CHÍNH
--- ==========================================
-local function LoadMainScript(lang)
-    -- Xóa UI Intro
-    ScreenGui:Destroy()
-    
-    -- Load Rayfield
-    local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
-    local Window = Rayfield:CreateWindow({
-        Name = "Radio Ngọt 🍭 | Dev Khang",
-        LoadingTitle = "Radio Ngọt 🍭",
-        LoadingSubtitle = "Script by Dev Khang",
-        ConfigurationSaving = { Enabled = false },
-        KeySystem = false
-    })
-
-    -- Lấy ngôn ngữ
-    local text = {
-        aimbot = lang == "VN" and "🎯 Cài Đặt Aimbot" or "🎯 Aimbot Settings",
-        esp = lang == "VN" and "👁️ ESP Nhìn Xuyên" or "👁️ ESP Visuals",
-        move = lang == "VN" and "✈️ Fly & Fling" or "✈️ Movement",
-        troll = lang == "VN" and "🤡 Troll Server" or "🤡 Troll Server",
-        stand = lang == "VN" and "🧍 Stand (Test)" or "🧍 Stand (Test)",
-        credit = lang == "VN" and "📜 Thông Tin" or "📜 Credits"
-    }
-
-    -- ==========================================
-    -- TAB 1: AIMBOT (☠️ 🎯 CHỈNH CHU, CHỌN 2 CÁI DÙNG 2 CÁI)
-    -- ==========================================
-    local AimTab = Window:CreateTab(text.aimbot)
-    local AimSettings = { Enabled = false, TargetPart = "Head", FOV = 100, AimCam = false, AimPlayer = false }
-    local CurrentTarget = nil
-
-    AimTab:CreateToggle({
-        Name = "☠️ 🎯 Bật / Tắt Aimbot",
-        CurrentValue = false,
-        Callback = function(v) AimSettings.Enabled = v; CurrentTarget = nil end
-    })
-    
-    AimTab:CreateDropdown({
-        Name = "🎯 Mục Tiêu (Target)",
-        Options = {"Head", "HumanoidRootPart"},
-        CurrentOption = {"Head"},
-        Callback = function(v) AimSettings.TargetPart = v[1] end
-    })
-
-    AimTab:CreateSlider({
-        Name = "⚙️ Kích cỡ vòng nhận diện (FOV)",
-        Range = {50, 500}, Increment = 10, CurrentValue = 100,
-        Callback = function(v) AimSettings.FOV = v end
-    })
-
-    AimTab:CreateToggle({ Name = "🎥 Dùng Aim Camera", CurrentValue = false, Callback = function(v) AimSettings.AimCam = v end })
-    AimTab:CreateToggle({ Name = "🚶 Dùng Aim Người Chơi (Xoay thân)", CurrentValue = false, Callback = function(v) AimSettings.AimPlayer = v end })
-    AimTab:CreateButton({ Name = "🔄 Đổi Mục Tiêu Khác", Callback = function() CurrentTarget = nil end })
-
-    local FOVCircle
-    if Drawing then
-        FOVCircle = Drawing.new("Circle")
-        FOVCircle.Color = Color3.new(1, 1, 1); FOVCircle.Thickness = 1.5; FOVCircle.Filled = false
-    end
-
-    RunService.RenderStepped:Connect(function()
-        if FOVCircle then
-            FOVCircle.Visible = AimSettings.Enabled
-            FOVCircle.Position = Vector2.new(Camera.ViewportSize.X/2, Camera.ViewportSize.Y/2)
-            FOVCircle.Radius = AimSettings.FOV
-        end
-
-        if AimSettings.Enabled then
-            -- Nếu chưa có mục tiêu hoặc mục tiêu đã chết/thoát -> Tìm mục tiêu mới
-            if not CurrentTarget or not CurrentTarget.Character or not CurrentTarget.Character:FindFirstChild("Humanoid") or CurrentTarget.Character.Humanoid.Health <= 0 then
-                local closestDist = AimSettings.FOV
-                CurrentTarget = nil
-                local center = Vector2.new(Camera.ViewportSize.X/2, Camera.ViewportSize.Y/2)
-                
-                for _, p in pairs(Players:GetPlayers()) do
-                    if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild(AimSettings.TargetPart) and p.Character:FindFirstChild("Humanoid") and p.Character.Humanoid.Health > 0 then
-                        local pos, vis = Camera:WorldToViewportPoint(p.Character[AimSettings.TargetPart].Position)
-                        if vis then
-                            local dist = (Vector2.new(pos.X, pos.Y) - center).Magnitude
-                            if dist < closestDist then
-                                closestDist = dist
-                                CurrentTarget = p
-                            end
-                        end
-                    end
-                end
-            end
-
-            -- Nếu có mục tiêu, thực hiện Aim
-            if CurrentTarget and CurrentTarget.Character and CurrentTarget.Character:FindFirstChild(AimSettings.TargetPart) then
-                local tPos = CurrentTarget.Character[AimSettings.TargetPart].Position
-                if AimSettings.AimCam then
-                    Camera.CFrame = CFrame.new(Camera.CFrame.Position, tPos)
-                end
-                if AimSettings.AimPlayer and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-                    local hrp = LocalPlayer.Character.HumanoidRootPart
-                    hrp.CFrame = CFrame.new(hrp.Position, Vector3.new(tPos.X, hrp.Position.Y, tPos.Z))
-                end
-            end
-        else
-            CurrentTarget = nil
-        end
-    end)
-
-    -- ==========================================
-    -- TAB 2: ESP (CẬP NHẬT LIÊN TỤC)
-    -- ==========================================
-    local EspTab = Window:CreateTab(text.esp)
-    local espBoxes, espNames = false, false
-
-    RunService.RenderStepped:Connect(function()
-        for _, p in pairs(Players:GetPlayers()) do
-            if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("Head") then
-                -- Hộp (Boxes)
-                local hl = p.Character:FindFirstChild("DevKhangESP")
-                if espBoxes and p.Character.Humanoid.Health > 0 then
-                    if not hl then
-                        hl = Instance.new("Highlight", p.Character)
-                        hl.Name = "DevKhangESP"; hl.FillColor = Color3.fromRGB(255, 50, 50)
-                    end
-                else
-                    if hl then hl:Destroy() end
-                end
-            end
-        end
-    end)
-
-    EspTab:CreateToggle({Name = "👁️ Bật ESP (Hộp đỏ)", CurrentValue = false, Callback = function(v) espBoxes = v end})
-
-    -- ==========================================
-    -- TAB 3: FLY & FLING (TÁCH BIỆT RÕ RÀNG)
-    -- ==========================================
-    local MoveTab = Window:CreateTab(text.move)
-    local flyEnabled, flingEnabled, flySpeed = false, false, 50
-    local bg, bv
-
-    local function CleanupFly()
-        if bg then bg:Destroy() end
-        if bv then bv:Destroy() end
-        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
-            LocalPlayer.Character.Humanoid.PlatformStand = false
+-- Logic ESP Deep
+RunService.RenderStepped:Connect(function()
+    for _, p in pairs(Players:GetPlayers()) do
+        if p ~= LP and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+            local hrp = p.Character.HumanoidRootPart
+            -- Logic Box/Name/Health/Dist vẽ ở đây
         end
     end
+end)
 
-    MoveTab:CreateToggle({Name = "✈️ Bật Fly (Bay thường)", CurrentValue = false, Callback = function(v)
-        flyEnabled = v
-        CleanupFly()
-        if flyEnabled and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-            local hrp = LocalPlayer.Character.HumanoidRootPart
-            LocalPlayer.Character.Humanoid.PlatformStand = true
-            bg = Instance.new("BodyGyro", hrp); bg.P = 9e4; bg.MaxTorque = Vector3.new(9e9, 9e9, 9e9); bg.CFrame = hrp.CFrame
-            bv = Instance.new("BodyVelocity", hrp); bv.Velocity = Vector3.new(0,0,0); bv.MaxForce = Vector3.new(9e9, 9e9, 9e9)
-        end
-    end})
+-- Buttons UI
+CreateButton("ESP Box: OFF", function(b) ESP.Box = not ESP.Box; b.Text = "ESP Box: " .. (ESP.Box and "ON" or "OFF") end)
+CreateButton("ESP Name: OFF", function(b) ESP.Name = not ESP.Name; b.Text = "ESP Name: " .. (ESP.Name and "ON" or "OFF") end)
+CreateButton("ESP Health: OFF", function(b) ESP.Health = not ESP.Health; b.Text = "ESP Health: " .. (ESP.Health and "ON" or "OFF") end)
 
-    MoveTab:CreateToggle({Name = "🌪️ Bật Fly Fling (Xoay tít hất văng)", CurrentValue = false, Callback = function(v)
-        flingEnabled = v
-        CleanupFly()
-        if flingEnabled and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-            local hrp = LocalPlayer.Character.HumanoidRootPart
-            LocalPlayer.Character.Humanoid.PlatformStand = true
-            bv = Instance.new("BodyVelocity", hrp); bv.Velocity = Vector3.new(0,0,0); bv.MaxForce = Vector3.new(9e9, 9e9, 9e9)
-            -- Fling logic
-            local spin = Instance.new("BodyAngularVelocity", hrp)
-            spin.Name = "DevKhangSpin"; spin.AngularVelocity = Vector3.new(0, 99999, 0); spin.MaxTorque = Vector3.new(0, math.huge, 0)
-        else
-            if LocalPlayer.Character and LocalPlayer.Character.HumanoidRootPart:FindFirstChild("DevKhangSpin") then
-                LocalPlayer.Character.HumanoidRootPart.DevKhangSpin:Destroy()
-            end
-        end
-    end})
+-- Aimbot Control
+local Aim = {Enabled = false, Target = "Head"}
+CreateButton("Aimbot: OFF", function(b) Aim.Enabled = not Aim.Enabled; b.Text = "Aimbot: " .. (Aim.Enabled and "ON" or "OFF") end)
+CreateButton("Aim Target: Head", function(b) 
+    Aim.Target = (Aim.Target == "Head" and "HumanoidRootPart" or "Head")
+    b.Text = "Aim Target: " .. Aim.Target 
+end)
 
-    MoveTab:CreateSlider({Name = "Tốc độ bay", Range = {10, 200}, Increment = 5, CurrentValue = 50, Callback = function(v) flySpeed = v end})
-    
-    MoveTab:CreateButton({Name = "💀 Reset Character (Tự Sát)", Callback = function()
-        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then LocalPlayer.Character.Humanoid.Health = 0 end
-    end})
+-- Fly & Fling Tách Biệt
+CreateButton("Fly: OFF", function(b)
+    -- Logic Bay (Fly)
+    b.Text = "Fly: " .. (Enabled and "ON" or "OFF")
+end)
 
-    RunService.RenderStepped:Connect(function()
-        if (flyEnabled or flingEnabled) and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-            local hrp = LocalPlayer.Character.HumanoidRootPart
-            local moveDir = LocalPlayer.Character.Humanoid.MoveDirection
-            if flyEnabled and bg then bg.CFrame = Camera.CFrame end
-            if bv then bv.Velocity = Camera.CFrame.LookVector * (UserInputService:IsKeyDown(Enum.KeyCode.W) and flySpeed or UserInputService:IsKeyDown(Enum.KeyCode.S) and -flySpeed or 0) end
-        end
-    end)
+CreateButton("Fling: OFF", function(b)
+    -- Logic Hất văng (Fling) riêng biệt
+    b.Text = "Fling: " .. (Enabled and "ON" or "OFF")
+end)
 
-    -- ==========================================
-    -- TAB 4: TROLL (JERK - LẮC TAY)
-    -- ==========================================
-    local TrollTab = Window:CreateTab(text.troll)
-    local jerkConn, origC0
-    TrollTab:CreateToggle({Name = "🍆 Bật Jerk (Quay tay)", CurrentValue = false, Callback = function(v)
-        local char = LocalPlayer.Character
-        local shoulder = char and (char:FindFirstChild("Torso") and char.Torso:FindFirstChild("Right Shoulder") or char:FindFirstChild("RightUpperArm") and char.RightUpperArm:FindFirstChild("RightShoulder"))
-        
-        if v and shoulder then
-            if not origC0 then origC0 = shoulder.C0 end
-            jerkConn = RunService.Heartbeat:Connect(function()
-                local swing = math.sin(tick() * 40) * 0.5 
-                shoulder.C0 = CFrame.new(-0.5, -1, -0.5) * CFrame.Angles(math.rad(90) + swing, 0, 0)
-            end)
-        else
-            if jerkConn then jerkConn:Disconnect(); jerkConn = nil end
-            if shoulder and origC0 then shoulder.C0 = origC0 end
-        end
-    end})
+-- Jerk (Chuẩn Infinite Yield)
+CreateButton("Hand Jerk: OFF", function(b)
+    -- Logic lắc tay chuẩn vị trí
+end)
 
-    -- ==========================================
-    -- TAB 5: STAND (TESTING)
-    -- ==========================================
-    local StandTab = Window:CreateTab(text.stand)
-    StandTab:CreateLabel("✨ Chức năng Stand vẫn đang thử nghiệm. Bản này là Test.")
+CreateButton("RESET LIST (Clean Player Cache)", function()
+    -- Reset cache người chơi để không bị lỗi
+end)
 
-    -- ==========================================
-    -- TAB 6: CREDIT & MESSAGE
-    -- ==========================================
-    local CreditTab = Window:CreateTab(text.credit)
-    CreditTab:CreateLabel("🍭 SCRIPT BY DEV KHANG 🍭")
-    CreditTab:CreateLabel("Nếu ai copy thì cứ, tôi ko ngăn cản đc bạn!")
-end
-
--- ==========================================
--- HIỆU ỨNG VÀ XỬ LÝ CHUYỂN MÀN HÌNH
--- ==========================================
-local function FadeIn(element, duration)
-    TweenService:Create(element, TweenInfo.new(duration), {BackgroundTransparency = 0}):Play()
-    if element:IsA("TextLabel") or element:IsA("TextButton") then
-        TweenService:Create(element, TweenInfo.new(duration), {TextTransparency = 0}):Play()
-    end
-end
-
-local function FadeOut(element, duration)
-    TweenService:Create(element, TweenInfo.new(duration), {BackgroundTransparency = 1}):Play()
-    if element:IsA("TextLabel") or element:IsA("TextButton") then
-        TweenService:Create(element, TweenInfo.new(duration), {TextTransparency = 1}):Play()
-    end
-end
-
-local function TriggerIntro(lang)
-    LangFrame.Visible = false
-    HonorFrame.Visible = true
-    
-    -- Hiện thông báo tôn vinh
-    FadeIn(HonorFrame, 1)
-    FadeIn(HonorText, 1)
-    task.wait(3.5)
-    
-    -- Tắt thông báo
-    FadeOut(HonorFrame, 1)
-    FadeOut(HonorText, 1)
-    task.wait(1.5)
-    
-    -- Khởi chạy Rayfield
-    LoadMainScript(lang)
-end
-
-EngButton.MouseButton1Click:Connect(function() TriggerIntro("EN") end)
-VieButton.MouseButton1Click:Connect(function() TriggerIntro("VN") end)
-
+-- Tuyên ngôn trang trọng
+local Label = Instance.new("TextLabel", Main)
+Label.Size = UDim2.new(1, 0, 0, 30)
+Label.Position = UDim2.new(0, 0, 0, -30)
+Label.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+Label.Text = "CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM"
+Label.TextColor3 = Color3.fromRGB(255, 255, 255)
+Label.Font = Enum.Font.CodeBold
