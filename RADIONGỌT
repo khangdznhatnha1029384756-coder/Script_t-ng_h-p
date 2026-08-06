@@ -1,91 +1,425 @@
 -- =========================================================================
--- RADIO NGỌT ULTIMATE - PHIÊN BẢN CỐ ĐỊNH & TOÀN DIỆN
--- CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM | ĐỘC LẬP - TỰ DO - HẠNH PHÚC
+-- RADIO NGỌT 🍭 - ULTIMATE SCRIPT (ORBIT FLY & FULL ESP)
 -- =========================================================================
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
-local LP = Players.LocalPlayer
+local CoreGui = game:GetService("CoreGui")
+local UserInputService = game:GetService("UserInputService")
 local Camera = workspace.CurrentCamera
+local LP = Players.LocalPlayer
 
--- UI Setup
-local Screen = Instance.new("ScreenGui", game:GetService("CoreGui"))
-local Main = Instance.new("Frame", Screen)
-Main.Size = UDim2.new(0, 250, 0, 450)
-Main.Position = UDim2.new(0.1, 0, 0.2, 0)
-Main.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-Main.BorderSizePixel = 0
-Main.Active = true
-Main.Draggable = true
-
-local Scroll = Instance.new("ScrollingFrame", Main)
-Scroll.Size = UDim2.new(1, 0, 1, 0)
-Scroll.BackgroundTransparency = 1
-Scroll.CanvasSize = UDim2.new(0, 0, 2, 0)
-local Layout = Instance.new("UIListLayout", Scroll)
-
--- Helper Functions
-local function CreateButton(text, callback)
-    local btn = Instance.new("TextButton", Scroll)
-    btn.Size = UDim2.new(1, -10, 0, 35)
-    btn.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    btn.Text = text
-    btn.MouseButton1Click:Connect(callback)
-    return btn
+-- Xóa UI nổi cũ nếu có
+if CoreGui:FindFirstChild("RadioNgotFloatingUI") then
+    CoreGui.RadioNgotFloatingUI:Destroy()
 end
 
--- ESP Data
-local ESP = {Box = false, Name = false, Health = false, Dist = false}
+-- Tạo nút Aimbot nổi trên màn hình
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "RadioNgotFloatingUI"
+ScreenGui.Parent = CoreGui
+ScreenGui.ResetOnSpawn = false
 
--- Logic ESP Deep
-RunService.RenderStepped:Connect(function()
-    for _, p in pairs(Players:GetPlayers()) do
-        if p ~= LP and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
-            local hrp = p.Character.HumanoidRootPart
-            -- Logic Box/Name/Health/Dist vẽ ở đây
-        end
+local AimScreenBtn = Instance.new("TextButton")
+AimScreenBtn.Size = UDim2.new(0, 180, 0, 40)
+AimScreenBtn.Position = UDim2.new(0, 20, 0.35, 0)
+AimScreenBtn.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+AimScreenBtn.TextColor3 = Color3.fromRGB(255, 50, 50)
+AimScreenBtn.Text = "🎯 AIMBOT: [ TẮT ]"
+AimScreenBtn.Font = Enum.Font.GothamBold
+AimScreenBtn.TextSize = 13
+AimScreenBtn.Active = true
+AimScreenBtn.Draggable = true
+AimScreenBtn.Parent = ScreenGui
+
+local UICorner1 = Instance.new("UICorner", AimScreenBtn)
+UICorner1.CornerRadius = UDim.new(0, 6)
+
+local SwitchTargetBtn = Instance.new("TextButton")
+SwitchTargetBtn.Size = UDim2.new(0, 180, 0, 30)
+SwitchTargetBtn.Position = UDim2.new(0, 20, 0.35, 45)
+SwitchTargetBtn.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+SwitchTargetBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+SwitchTargetBtn.Text = "🔄 Mục tiêu: ĐẦU (Head)"
+SwitchTargetBtn.Font = Enum.Font.GothamSemibold
+SwitchTargetBtn.TextSize = 11
+SwitchTargetBtn.Active = true
+SwitchTargetBtn.Draggable = true
+SwitchTargetBtn.Parent = ScreenGui
+
+local UICorner2 = Instance.new("UICorner", SwitchTargetBtn)
+UICorner2.CornerRadius = UDim.new(0, 6)
+
+-- Tải giao diện Rayfield chính (Đen tuyền, chuẩn cốt lõi Radio Ngọt)
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+
+local Window = Rayfield:CreateWindow({
+   Name = "RADIO NGỌT 🍭 | ULTIMATE MENU",
+   LoadingTitle = "Đang khởi động hệ thống Radio Ngọt...",
+   LoadingSubtitle = "Kiểu bay vòng tròn & Đầy đủ tính năng",
+   ConfigurationSaving = {Enabled = false},
+   KeySystem = false
+})
+
+-- Biến cấu hình toàn cục
+local Config = {
+    AimActive = false,
+    AimPart = "Head",
+    ESP_Box = false,
+    ESP_Name = false,
+    ESP_Health = false,
+    ESP_Dist = false,
+    FlyActive = false,
+    FlySpeed = 50,
+    FlyRadius = 15, -- Bán kính bay vòng tròn
+    FlyHeight = 5,  -- Độ cao trên đầu
+    FlingActive = false,
+    JerkActive = false
+}
+
+-- Xử lý nút nổi Aimbot
+AimScreenBtn.MouseButton1Click:Connect(function()
+    Config.AimActive = not Config.AimActive
+    if Config.AimActive then
+        AimScreenBtn.Text = "🎯 AIMBOT: [ BẬT ]"
+        AimScreenBtn.TextColor3 = Color3.fromRGB(50, 255, 50)
+    else
+        AimScreenBtn.Text = "🎯 AIMBOT: [ TẮT ]"
+        AimScreenBtn.TextColor3 = Color3.fromRGB(255, 50, 50)
     end
 end)
 
--- Buttons UI
-CreateButton("ESP Box: OFF", function(b) ESP.Box = not ESP.Box; b.Text = "ESP Box: " .. (ESP.Box and "ON" or "OFF") end)
-CreateButton("ESP Name: OFF", function(b) ESP.Name = not ESP.Name; b.Text = "ESP Name: " .. (ESP.Name and "ON" or "OFF") end)
-CreateButton("ESP Health: OFF", function(b) ESP.Health = not ESP.Health; b.Text = "ESP Health: " .. (ESP.Health and "ON" or "OFF") end)
-
--- Aimbot Control
-local Aim = {Enabled = false, Target = "Head"}
-CreateButton("Aimbot: OFF", function(b) Aim.Enabled = not Aim.Enabled; b.Text = "Aimbot: " .. (Aim.Enabled and "ON" or "OFF") end)
-CreateButton("Aim Target: Head", function(b) 
-    Aim.Target = (Aim.Target == "Head" and "HumanoidRootPart" or "Head")
-    b.Text = "Aim Target: " .. Aim.Target 
+SwitchTargetBtn.MouseButton1Click:Connect(function()
+    if Config.AimPart == "Head" then
+        Config.AimPart = "HumanoidRootPart"
+        SwitchTargetBtn.Text = "🔄 Mục tiêu: THÂN (Root)"
+        SwitchTargetBtn.TextColor3 = Color3.fromRGB(100, 200, 255)
+    else
+        Config.AimPart = "Head"
+        SwitchTargetBtn.Text = "🔄 Mục tiêu: ĐẦU (Head)"
+        SwitchTargetBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    end
 end)
 
--- Fly & Fling Tách Biệt
-CreateButton("Fly: OFF", function(b)
-    -- Logic Bay (Fly)
-    b.Text = "Fly: " .. (Enabled and "ON" or "OFF")
-end)
+-- ==========================================
+-- TAB 1: COMBAT & ESP (ĐẦY ĐỦ MỤC)
+-- ==========================================
+local CombatTab = Window:CreateTab("Combat & ESP", "crosshair")
 
-CreateButton("Fling: OFF", function(b)
-    -- Logic Hất văng (Fling) riêng biệt
-    b.Text = "Fling: " .. (Enabled and "ON" or "OFF")
-end)
+CombatTab:CreateSection("Aimbot Cài Đặt Nhanh")
+CombatTab:CreateToggle({
+   Name = "Bật/Tắt Aimbot (Đồng bộ màn hình)",
+   CurrentValue = false,
+   Callback = function(v)
+       Config.AimActive = v
+       AimScreenBtn.Text = v and "🎯 AIMBOT: [ BẬT ]" or "🎯 AIMBOT: [ TẮT ]"
+       AimScreenBtn.TextColor3 = v and Color3.fromRGB(50, 255, 50) or Color3.fromRGB(255, 50, 50)
+   end
+})
 
--- Jerk (Chuẩn Infinite Yield)
-CreateButton("Hand Jerk: OFF", function(b)
-    -- Logic lắc tay chuẩn vị trí
-end)
+CombatTab:CreateSection("Hệ thống ESP Toàn Diện")
+CombatTab:CreateToggle({Name = "ESP Box (Hộp Silent)", CurrentValue = false, Callback = function(v) Config.ESP_Box = v end})
+CombatTab:CreateToggle({Name = "ESP Name (Tên)", CurrentValue = false, Callback = function(v) Config.ESP_Name = v end})
+CombatTab:CreateToggle({Name = "ESP Health (Máu / Trái tim)", CurrentValue = false, Callback = function(v) Config.ESP_Health = v end})
+CombatTab:CreateToggle({Name = "ESP Distance (Khoảng cách & Vị trí)", CurrentValue = false, Callback = function(v) Config.ESP_Dist = v end})
 
-CreateButton("RESET LIST (Clean Player Cache)", function()
-    -- Reset cache người chơi để không bị lỗi
-end)
+CombatTab:CreateButton({
+   Name = "🔄 Refresh Danh Sách Player / Đếm số lượng người",
+   Callback = function()
+       local count = 0
+       for _, p in pairs(Players:GetPlayers()) do
+           if p ~= LP then count = count + 1 end
+       end
+       Rayfield:Notify({Title = "Radio Ngọt ESP", Content = "Tổng số người chơi trong server: " .. count, Duration = 3})
+   end
+})
 
--- Tuyên ngôn trang trọng
-local Label = Instance.new("TextLabel", Main)
-Label.Size = UDim2.new(1, 0, 0, 30)
-Label.Position = UDim2.new(0, 0, 0, -30)
-Label.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-Label.Text = "CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM"
-Label.TextColor3 = Color3.fromRGB(255, 255, 255)
-Label.Font = Enum.Font.CodeBold
+-- ==========================================
+-- TAB 2: MOVEMENT (FLY VÒNG TRÒN & FLING RIÊNG BIỆT)
+-- ==========================================
+local MoveTab = Window:CreateTab("Movement", "move")
+local BodyGyro, BodyVelocity, FlingSpin
+
+MoveTab:CreateSection("Kiểu Bay Cốt Lõi (Đằng sau lưng, trên đầu, vòng tròn xung quanh)")
+MoveTab:CreateToggle({
+   Name = "Bật Fly Kiểu Vòng Tròn / Bám Theo Mục Tiêu",
+   CurrentValue = false,
+   Callback = function(v)
+       Config.FlyActive = v
+       local char = LP.Character
+       if not char or not char:FindFirstChild("HumanoidRootPart") then return end
+       local hrp = char.HumanoidRootPart
+       
+       if v then
+           char.Humanoid.PlatformStand = true
+           BodyGyro = Instance.new("BodyGyro", hrp)
+           BodyGyro.P = 9e4; BodyGyro.MaxTorque = Vector3.new(9e9, 9e9, 9e9); BodyGyro.CFrame = hrp.CFrame
+           
+           BodyVelocity = Instance.new("BodyVelocity", hrp)
+           BodyVelocity.Velocity = Vector3.new(0,0,0); BodyVelocity.MaxForce = Vector3.new(9e9, 9e9, 9e9)
+       else
+           char.Humanoid.PlatformStand = false
+           if BodyGyro then BodyGyro:Destroy() end
+           if BodyVelocity then BodyVelocity:Destroy() end
+       end
+   end
+})
+
+-- Ô điền số thay vì kéo thanh trượt cho Tốc độ Fly
+MoveTab:CreateInput({
+   Name = "Điền Tốc Độ Fly (Speed)",
+   PlaceholderText = "Nhập số (VD: 50)",
+   RemoveTextAfterFocusLost = false,
+   Callback = function(text)
+       local num = tonumber(text)
+       if num then Config.FlySpeed = num end
+   end
+})
+
+-- Ô điền số cho Bán kính vòng tròn (Radius)
+MoveTab:CreateInput({
+   Name = "Điền Bán Kính Vòng Tròn (Radius)",
+   PlaceholderText = "Nhập số (VD: 15)",
+   RemoveTextAfterFocusLost = false,
+   Callback = function(text)
+       local num = tonumber(text)
+       if num then Config.FlyRadius = num end
+   end
+})
+
+-- Ô điền số cho Độ cao trên đầu
+MoveTab:CreateInput({
+   Name = "Điền Độ Cao Trên Đầu (Height)",
+   PlaceholderText = "Nhập số (VD: 5)",
+   RemoveTextAfterFocusLost = false,
+   Callback = function(text)
+       local num = tonumber(text)
+       if num then Config.FlyHeight = num end
+   end
+})
+
+MoveTab:CreateButton({
+   Name = "🔄 RESET DANH SÁCH FLY / LÀM SẠCH CACHE SERVER",
+   Callback = function()
+       Config.FlyActive = false
+       if BodyGyro then BodyGyro:Destroy() end
+       if BodyVelocity then BodyVelocity:Destroy() end
+       if LP.Character and LP.Character:FindFirstChild("Humanoid") then
+           LP.Character.Humanoid.PlatformStand = false
+       end
+       -- Làm sạch cache player trong danh sách server đối với Fly
+       for _, p in pairs(Players:GetPlayers()) do
+           if p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+               for _, obj in pairs(p.Character.HumanoidRootPart:GetChildren()) do
+                   if obj:IsA("BodyVelocity") or obj:IsA("BodyGyro") then
+                       obj:Destroy()
+                   end
+               end
+           end
+       end
+       Rayfield:Notify({Title = "Radio Ngọt", Content = "Đã reset toàn bộ danh sách và cache Fly!", Duration = 2})
+   end
+})
+
+MoveTab:CreateSection("Hệ Thống Fling (Tách biệt hoàn toàn)")
+MoveTab:CreateToggle({
+   Name = "Bật Fling (Xoay hất văng)",
+   CurrentValue = false,
+   Callback = function(v)
+       Config.FlingActive = v
+       local char = LP.Character
+       if not char or not char:FindFirstChild("HumanoidRootPart") then return end
+       local hrp = char.HumanoidRootPart
+       
+       if v then
+           FlingSpin = Instance.new("BodyAngularVelocity", hrp)
+           FlingSpin.Name = "RadioFlingSpin"
+           FlingSpin.AngularVelocity = Vector3.new(0, 99999, 0)
+           FlingSpin.MaxTorque = Vector3.new(0, math.huge, 0)
+       else
+           if hrp:FindFirstChild("RadioFlingSpin") then hrp.RadioFlingSpin:Destroy() end
+       end
+   end
+})
+
+MoveTab:CreateButton({
+   Name = "🔄 RESET DANH SÁCH FLING / LÀM SẠCH CACHE SERVER",
+   Callback = function()
+       Config.FlingActive = false
+       local hrp = LP.Character and LP.Character:FindFirstChild("HumanoidRootPart")
+       if hrp then
+           for _, obj in pairs(hrp:GetChildren()) do
+               if obj.Name == "RadioFlingSpin" or obj:IsA("BodyAngularVelocity") then
+                   obj:Destroy()
+               end
+           end
+       end
+       -- Dọn sạch cache fling trên toàn bộ server để tránh lỗi
+       for _, p in pairs(Players:GetPlayers()) do
+           if p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+               for _, obj in pairs(p.Character.HumanoidRootPart:GetChildren()) do
+                   if obj.Name == "RadioFlingSpin" or obj:IsA("BodyAngularVelocity") then
+                       obj:Destroy()
+                   end
+               end
+           end
+       end
+       Rayfield:Notify({Title = "Radio Ngọt", Content = "Đã reset toàn bộ danh sách và cache Fling!", Duration = 2})
+   end
+})
+
+-- ==========================================
+-- TAB 3: TROLL & MISC (TAY JERK CHUẨN IY)
+-- ==========================================
+local TrollTab = Window:CreateTab("Troll & Misc", "ghost")
+local jerkConnection, originalShoulderC0
+
+TrollTab:CreateSection("Trolling & Tính Năng Phụ")
+TrollTab:CreateToggle({
+   Name = "Hand Jerk (Chuẩn chỉnh vị trí menu Infinite Yield)",
+   CurrentValue = false,
+   Callback = function(v)
+       Config.JerkActive = v
+       local char = LP.Character
+       local shoulder = char and (char:FindFirstChild("Torso") and char.Torso:FindFirstChild("Right Shoulder") or char:FindFirstChild("RightUpperArm") and char.RightUpperArm:FindFirstChild("RightShoulder"))
+       
+       if v and shoulder then
+           if not originalShoulderC0 then originalShoulderC0 = shoulder.C0 end
+           jerkConnection = RunService.Heartbeat:Connect(function()
+               if shoulder and shoulder.Parent then
+                   local swing = math.sin(tick() * 50) * 0.7
+                   shoulder.C0 = CFrame.new(-0.5, -1, -0.5) * CFrame.Angles(math.rad(90) + swing, 0, 0)
+               end
+           end)
+       else
+           if jerkConnection then
+               jerkConnection:Disconnect()
+               jerkConnection = nil
+           end
+           if shoulder and originalShoulderC0 then
+               shoulder.C0 = originalShoulderC0
+               originalShoulderC0 = nil
+           end
+       end
+   end
+})
+
+TrollTab:CreateButton({
+   Name = "🔄 Refresh Toàn Bộ Cache Người Chơi Trong Server",
+   Callback = function()
+       for _, p in pairs(Players:GetPlayers()) do
+           if p.Character then
+               if p.Character:FindFirstChild("RadioESP_Box") then p.Character.RadioESP_Box:Destroy() end
+               if p.Character:FindFirstChild("Head") and p.Character.Head:FindFirstChild("RadioESP_Info") then p.Character.Head.RadioESP_Info:Destroy() end
+           end
+       end
+       Rayfield:Notify({Title = "Radio Ngọt", Content = "Đã dọn sạch toàn bộ cache người chơi!", Duration = 2})
+   end
+})
+
+TrollTab:CreateButton({
+   Name = "💀 Tự Sát (Reset Nhân Vật Tránh Kẹt Mát Cấp Tốc)",
+   Callback = function()
+       if LP.Character and LP.Character:FindFirstChild("Humanoid") then
+           LP.Character.Humanoid.Health = 0
+       end
+   end
+})
+
+-- ==========================================
+-- VÒNG LẶP XỬ LÝ TOÀN CỤC (RENDER STEPPED)
+-- ==========================================
+RunService.RenderStepped:Connect(function()
+    -- 1. Aimbot khóa mục tiêu gần nhất
+    if Config.AimActive then
+        local closestTarget = nil
+        local shortestDist = math.huge
+        local centerScreen = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
+        
+        for _, p in pairs(Players:GetPlayers()) do
+            if p ~= LP and p.Character and p.Character:FindFirstChild(Config.AimPart) and p.Character:FindFirstChild("Humanoid") and p.Character.Humanoid.Health > 0 then
+                local partPos = p.Character[Config.AimPart].Position
+                local screenPos, onScreen = Camera:WorldToViewportPoint(partPos)
+                if onScreen then
+                    local dist = (Vector2.new(screenPos.X, screenPos.Y) - centerScreen).Magnitude
+                    if dist < shortestDist then
+                        shortestDist = dist
+                        closestTarget = p
+                    end
+                end
+            end
+        end
+        
+        if closestTarget and closestTarget.Character and closestTarget.Character:FindFirstChild(Config.AimPart) then
+            Camera.CFrame = CFrame.new(Camera.CFrame.Position, closestTarget.Character[Config.AimPart].Position)
+        end
+    end
+
+    -- 2. ESP Chi tiết tự động nhận diện người ra/vào server
+    for _, p in pairs(Players:GetPlayers()) do
+        if p ~= LP and p.Character and p.Character:FindFirstChild("HumanoidRootPart") and p.Character:FindFirstChild("Humanoid") then
+            local char = p.Character
+            local hrp = char.HumanoidRootPart
+            local head = char:FindFirstChild("Head")
+            
+            -- ESP Box
+            local boxHL = char:FindFirstChild("RadioESP_Box")
+            if Config.ESP_Box and char.Humanoid.Health > 0 then
+                if not boxHL then
+                    boxHL = Instance.new("Highlight", char)
+                    boxHL.Name = "RadioESP_Box"
+                    boxHL.FillColor = Color3.fromRGB(255, 0, 0)
+                    boxHL.OutlineColor = Color3.fromRGB(255, 255, 255)
+                    boxHL.FillTransparency = 0.5
+                end
+            else
+                if boxHL then boxHL:Destroy() end
+            end
+            
+            -- ESP Tên, Máu, Khoảng cách
+            local infoTag = head and head:FindFirstChild("RadioESP_Info")
+            if (Config.ESP_Name or Config.ESP_Health or Config.ESP_Dist) and char.Humanoid.Health > 0 and head then
+                if not infoTag then
+                    infoTag = Instance.new("BillboardGui", head)
+                    infoTag.Name = "RadioESP_Info"
+                    infoTag.Size = UDim2.new(0, 200, 0, 70)
+                    infoTag.AlwaysOnTop = true
+                    infoTag.StudsOffset = Vector3.new(0, 3, 0)
+                    
+                    local txt = Instance.new("TextLabel", infoTag)
+                    txt.Name = "Text"
+                    txt.Size = UDim2.new(1, 0, 1, 0)
+                    txt.BackgroundTransparency = 1
+                    txt.TextColor3 = Color3.fromRGB(255, 255, 255)
+                    txt.TextStrokeTransparency = 0
+                    txt.Font = Enum.Font.GothamBold
+                    txt.TextSize = 12
+                end
+                
+                local textStr = ""
+                if Config.ESP_Name then textStr = textStr .. "👤 Tên: " .. p.Name .. "\n" end
+                if Config.ESP_Health then textStr = textStr .. "❤️ Máu (HP): " .. math.floor(char.Humanoid.Health) .. "\n" end
+                if Config.ESP_Dist and LP.Character and LP.Character:FindFirstChild("HumanoidRootPart") then
+                    local distance = math.floor((LP.Character.HumanoidRootPart.Position - hrp.Position).Magnitude)
+                    textStr = textStr .. "📍 Khoảng cách: " .. distance .. " Studs"
+                end
+                infoTag.Text.Text = textStr
+            else
+                if infoTag then infoTag:Destroy() end
+            end
+        end
+    end
+
+    -- 3. Kiểu bay cốt lõi Radio Ngọt: Bay vòng tròn xung quanh, đằng sau lưng và trên đầu mục tiêu / camera
+    if Config.FlyActive and BodyVelocity and LP.Character and LP.Character:FindFirstChild("HumanoidRootPart") then
+        local hrp = LP.Character.HumanoidRootPart
+        local angle = tick() * (Config.FlySpeed * 0.1)
+        -- Tạo quỹ đạo bay vòng tròn xung quanh vị trí camera kết hợp độ cao trên đầu
+        local camPos = Camera.CFrame.Position
+        local targetOffset = Vector3.new(math.cos(angle) * Config.FlyRadius, Config.FlyHeight, math.sin(angle) * Config.FlyRadius)
+        local targetPos = camPos + targetOffset
+        
+        if BodyGyro then BodyGyro.CFrame = Camera.CFrame end
+        BodyVelocity.Velocity = (targetPos - hrp.Position) * 5
+    end
+end)
