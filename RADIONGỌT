@@ -1,5 +1,5 @@
 -- =========================================================================
--- RADIO NGỌT 🍭 | DEVELOPER KHANG - ULTIMATE SCRIPT
+-- RADIO NGỌT 🍭 | DEVELOPER KHANG - ULTIMATE SCRIPT (BẢN TRẢ FLY V1)
 -- =========================================================================
 
 local Players = game:GetService("Players")
@@ -8,7 +8,7 @@ local CoreGui = game:GetService("CoreGui")
 local Camera = workspace.CurrentCamera
 local LP = Players.LocalPlayer
 
--- Xóa UI cũ nếu bị trùng
+-- Dọn dẹp sạch UI cũ
 if CoreGui:FindFirstChild("RadioNgotBoot") then CoreGui.RadioNgotBoot:Destroy() end
 if CoreGui:FindFirstChild("RadioNgotMain") then CoreGui.RadioNgotMain:Destroy() end
 
@@ -76,39 +76,39 @@ BtnEN.MouseButton1Click:Connect(function()
 end)
 
 -- ==========================================
--- BƯỚC 2: HÀM CHẠY SCRIPT CHÍNH SAU KHI KÍCH HOẠT
+-- BƯỚC 2: HÀM CHẠY SCRIPT CHÍNH
 -- ==========================================
 local function StartMainScript()
     BootGui:Destroy()
 
-    -- Từ điển đa ngôn ngữ
+    -- Từ điển song ngữ
     local T = {
         VN = {
-            AimOn = "🎯 AIM KHÓA: [ BẬT ]", AimOff = "🎯 AIM KHÓA: [ TẮT ]", SwitchAim = "🔄 Bỏ Qua & Đổi Mục Tiêu Aim",
+            AimOn = "🎯 AIM KHÓA: [ BẬT ]", AimOff = "🎯 AIM KHÓA: [ TẮT ]", SwitchAim = "🔄 Đổi Mục Tiêu Aim Khác",
             TabCombat = "Combat & ESP", TabMove = "Di Chuyển (Fly/Fling)", TabMisc = "Tính Năng Phụ",
             AimLockUIName = "Khóa vị trí nút Aim trên màn hình", 
             ESPBox = "ESP Hộp (Box)", ESPName = "ESP Tên", ESPHP = "ESP Máu", ESPDist = "ESP Khoảng Cách",
-            FlyTarget = "Chọn người để bay bám theo", RefreshFly = "🔄 Làm Mới Danh Sách Người Bay", ToggleFly = "Bật/Tắt Bay Vòng Tròn (Orbit Fly)",
+            FlyTarget = "Chọn người để bay bám theo", RefreshFly = "🔄 Reset Danh Sách Người Chơi (Fly)", ToggleFly = "Bật/Tắt Bay Vòng Tròn (Bản Gốc)",
             Speed = "Điền Tốc Độ Bay", Radius = "Điền Bán Kính (Radius)", Height = "Điền Độ Cao (Height)",
-            FlingTarget = "Chọn người để Hất Văng (Fling)", RefreshFling = "🔄 Làm Mới Danh Sách Fling", ToggleFling = "Bật/Tắt Fling (Tự động chuyển mục tiêu khi chết)",
-            Jerk = "Tay Jerk (Infinite Yield)"
+            FlingTarget = "Chọn người để Hất Văng (Fling)", RefreshFling = "🔄 Reset Danh Sách Người Chơi (Fling)", ToggleFling = "Bật/Tắt Fling (Tự reset khi địch chết)",
+            Jerk = "Tay Jerk (Vuốt chuẩn IY)"
         },
         EN = {
-            AimOn = "🎯 AIM LOCK: [ ON ]", AimOff = "🎯 AIM LOCK: [ OFF ]", SwitchAim = "🔄 Skip & Switch Aim Target",
+            AimOn = "🎯 AIM LOCK: [ ON ]", AimOff = "🎯 AIM LOCK: [ OFF ]", SwitchAim = "🔄 Switch Aim Target",
             TabCombat = "Combat & ESP", TabMove = "Movement (Fly/Fling)", TabMisc = "Misc",
             AimLockUIName = "Lock Aim UI Position", 
             ESPBox = "ESP Box", ESPName = "ESP Name", ESPHP = "ESP Health", ESPDist = "ESP Distance",
-            FlyTarget = "Select Fly Target", RefreshFly = "🔄 Refresh Fly Player List", ToggleFly = "Toggle Orbit Fly",
+            FlyTarget = "Select Fly Target", RefreshFly = "🔄 Reset Player List (Fly)", ToggleFly = "Toggle Orbit Fly (Original)",
             Speed = "Input Speed", Radius = "Input Radius", Height = "Input Height",
-            FlingTarget = "Select Fling Target", RefreshFling = "🔄 Refresh Fling Player List", ToggleFling = "Toggle Auto-Reset Fling",
-            Jerk = "Hand Jerk (Infinite Yield)"
+            FlingTarget = "Select Fling Target", RefreshFling = "🔄 Reset Player List (Fling)", ToggleFling = "Toggle Fling (Auto-Reset)",
+            Jerk = "Hand Jerk (IY Stroke)"
         }
     }
     local L = T[Lang]
 
-    -- Config tổng phân tách rạch ròi
+    -- Config phân tách từng tính năng
     local Config = {
-        AimActive = false, AimTargetPlayer = nil, IgnoreAimList = {},
+        AimActive = false, AimTargetPlayer = nil, IgnoreAimList = {}, AimSmoothness = 0.2,
         ESP_Box = false, ESP_Name = false, ESP_Health = false, ESP_Dist = false,
         FlyActive = false, FlyTarget = "", FlySpeed = 20, FlyRadius = 10, FlyHeight = 5,
         FlingActive = false, FlingTarget = "",
@@ -121,7 +121,7 @@ local function StartMainScript()
         return names
     end
 
-    -- Khởi tạo UI Aim Trên Màn Hình
+    -- ================== KHỞI TẠO UI AIM MÀN HÌNH ==================
     local MainGui = Instance.new("ScreenGui", CoreGui)
     MainGui.Name = "RadioNgotMain"
 
@@ -148,36 +148,41 @@ local function StartMainScript()
 
     SwitchAimBtn.MouseButton1Click:Connect(function()
         if Config.AimTargetPlayer then
-            Config.IgnoreAimList[Config.AimTargetPlayer.Name] = true -- Đưa vào danh sách bỏ qua để tìm đứa khác
+            Config.IgnoreAimList[Config.AimTargetPlayer.Name] = true
             Config.AimTargetPlayer = nil
         end
     end)
 
-    -- Khởi tạo Rayfield
+    -- ================== KHỞI TẠO RAYFIELD MENU ==================
     local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
     local Window = Rayfield:CreateWindow({
        Name = "RADIO NGỌT 🍭 | DEV KHANG",
        LoadingTitle = "Đang tải hệ thống...",
-       LoadingSubtitle = "Phiên bản gộp chức năng hoàn chỉnh",
+       LoadingSubtitle = "Phiên bản: Trả Fly Cũ + Fling Reset + Aim Mượt",
        ConfigurationSaving = {Enabled = false}
     })
 
-    -- TAB 1: COMBAT
+    -- TAB 1: COMBAT & ESP (Aim đã sửa mượt)
     local CombatTab = Window:CreateTab(L.TabCombat, "crosshair")
     CombatTab:CreateToggle({Name = L.AimLockUIName, CurrentValue = false, Callback = function(v) AimScreenBtn.Draggable = not v; SwitchAimBtn.Draggable = not v end})
+    CombatTab:CreateSlider({Name = "Độ Mượt Aim (Smoothness)", Range = {1, 10}, Increment = 1, CurrentValue = 3, Callback = function(v) Config.AimSmoothness = v / 10 end})
     CombatTab:CreateSection("ESP CONFIG")
     CombatTab:CreateToggle({Name = L.ESPBox, Callback = function(v) Config.ESP_Box = v end})
     CombatTab:CreateToggle({Name = L.ESPName, Callback = function(v) Config.ESP_Name = v end})
     CombatTab:CreateToggle({Name = L.ESPHP, Callback = function(v) Config.ESP_Health = v end})
     CombatTab:CreateToggle({Name = L.ESPDist, Callback = function(v) Config.ESP_Dist = v end})
 
-    -- TAB 2: MOVEMENT (FLY & FLING TÁCH RIÊNG HOÀN TOÀN)
+    -- TAB 2: MOVEMENT (FLY BẢN ĐẦU & FLING TÁCH RỜI)
     local MoveTab = Window:CreateTab(L.TabMove, "move")
-    local BodyGyro, BodyVelocity, FlingSpin
+    local BodyGyro, BodyVelocity, FlingSpin 
     
-    MoveTab:CreateSection("--- HỆ THỐNG BAY VÒNG TRÒN (FLY) ---")
+    MoveTab:CreateSection("--- FLY ORBIT (BẢN GỐC DÙNG BODYVELOCITY) ---")
     local FlyDropdown = MoveTab:CreateDropdown({Name = L.FlyTarget, Options = GetPlayerNames(), CurrentOption = "", MultipleOptions = false, Callback = function(Opt) Config.FlyTarget = Opt[1] end})
-    MoveTab:CreateButton({Name = L.RefreshFly, Callback = function() FlyDropdown:Refresh(GetPlayerNames(), true) end})
+    
+    -- NÚT RESET DANH SÁCH NGƯỜI CHƠI (FLY)
+    MoveTab:CreateButton({Name = L.RefreshFly, Callback = function() 
+        FlyDropdown:Refresh(GetPlayerNames(), true) 
+    end})
     
     MoveTab:CreateToggle({
        Name = L.ToggleFly,
@@ -186,8 +191,13 @@ local function StartMainScript()
            local hrp = LP.Character and LP.Character:FindFirstChild("HumanoidRootPart")
            if v and hrp then
                LP.Character.Humanoid.PlatformStand = true
-               BodyGyro = Instance.new("BodyGyro", hrp); BodyGyro.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
-               BodyVelocity = Instance.new("BodyVelocity", hrp); BodyVelocity.MaxForce = Vector3.new(9e9, 9e9, 9e9)
+               
+               -- Trả lại BodyVelocity bản đầu tiên
+               BodyGyro = Instance.new("BodyGyro", hrp)
+               BodyGyro.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
+               
+               BodyVelocity = Instance.new("BodyVelocity", hrp)
+               BodyVelocity.MaxForce = Vector3.new(9e9, 9e9, 9e9)
            else
                if hrp then LP.Character.Humanoid.PlatformStand = false end
                if BodyGyro then BodyGyro:Destroy() end
@@ -201,7 +211,11 @@ local function StartMainScript()
 
     MoveTab:CreateSection("--- HỆ THỐNG FLING (AUTO RESET) ---")
     local FlingDropdown = MoveTab:CreateDropdown({Name = L.FlingTarget, Options = GetPlayerNames(), CurrentOption = "", MultipleOptions = false, Callback = function(Opt) Config.FlingTarget = Opt[1] end})
-    MoveTab:CreateButton({Name = L.RefreshFling, Callback = function() FlingDropdown:Refresh(GetPlayerNames(), true) end})
+    
+    -- NÚT RESET DANH SÁCH NGƯỜI CHƠI (FLING)
+    MoveTab:CreateButton({Name = L.RefreshFling, Callback = function() 
+        FlingDropdown:Refresh(GetPlayerNames(), true) 
+    end})
 
     MoveTab:CreateToggle({
        Name = L.ToggleFling,
@@ -217,17 +231,22 @@ local function StartMainScript()
        end
     })
 
-    -- TAB 3: TROLL & MISC
+    -- TAB 3: TROLL & MISC (Jerk Vuốt chuẩn)
     local MiscTab = Window:CreateTab(L.TabMisc, "ghost")
     local jerkConn, origC0
     MiscTab:CreateToggle({
        Name = L.Jerk,
        Callback = function(v)
-           local shoulder = LP.Character and (LP.Character:FindFirstChild("Torso") and LP.Character.Torso:FindFirstChild("Right Shoulder") or LP.Character:FindFirstChild("RightUpperArm") and LP.Character.RightUpperArm:FindFirstChild("RightShoulder"))
+           local char = LP.Character
+           local shoulder = char and (char:FindFirstChild("Torso") and char.Torso:FindFirstChild("Right Shoulder") or char:FindFirstChild("RightUpperArm") and char.RightUpperArm:FindFirstChild("RightShoulder"))
+           
            if v and shoulder then
-               origC0 = origC0 or shoulder.C0
+               if not origC0 then origC0 = shoulder.C0 end
                jerkConn = RunService.Heartbeat:Connect(function()
-                   shoulder.C0 = CFrame.new(-0.5, -1, -0.5) * CFrame.Angles(math.rad(90) + math.sin(tick() * 50) * 0.7, 0, 0)
+                   if shoulder and shoulder.Parent then
+                       local strokeMotion = math.sin(tick() * 30) * 0.5
+                       shoulder.C0 = origC0 * CFrame.Angles(math.rad(90) + strokeMotion, 0, 0)
+                   end
                end)
            else
                if jerkConn then jerkConn:Disconnect() end
@@ -236,9 +255,9 @@ local function StartMainScript()
        end
     })
 
-    -- VÒNG LẶP XỬ LÝ TOÀN CỤC (CORE LOGIC)
+    -- ================== CORE LOGIC ==================
     RunService.RenderStepped:Connect(function()
-        -- 1. AIMBOT (Khóa & Chuyển Đổi)
+        -- 1. AIMBOT SMOOTH (Cam lia mượt)
         if Config.AimActive then
             if not Config.AimTargetPlayer or not Config.AimTargetPlayer.Character or not Config.AimTargetPlayer.Character:FindFirstChild("Head") or Config.AimTargetPlayer.Character.Humanoid.Health <= 0 then
                 local shortest = math.huge
@@ -253,7 +272,8 @@ local function StartMainScript()
                 end
             end
             if Config.AimTargetPlayer and Config.AimTargetPlayer.Character and Config.AimTargetPlayer.Character:FindFirstChild("Head") then
-                Camera.CFrame = CFrame.new(Camera.CFrame.Position, Config.AimTargetPlayer.Character.Head.Position)
+                local targetCFrame = CFrame.new(Camera.CFrame.Position, Config.AimTargetPlayer.Character.Head.Position)
+                Camera.CFrame = Camera.CFrame:Lerp(targetCFrame, Config.AimSmoothness)
             end
         end
 
@@ -286,34 +306,34 @@ local function StartMainScript()
             end
         end
 
-        -- 3. FLY BÁM ĐUÔI VÀ XOAY VÒNG (ĐỘC LẬP)
-        if Config.FlyActive and BodyVelocity and Config.FlyTarget ~= "" then
+        -- 3. FLY ORBIT BẢN ĐẦU (DÙNG BODYVELOCITY VÀ BODYGYRO LẠI)
+        if Config.FlyActive and BodyVelocity and BodyGyro and Config.FlyTarget ~= "" then
             local tPlayer = Players:FindFirstChild(Config.FlyTarget)
             if tPlayer and tPlayer.Character and tPlayer.Character:FindFirstChild("HumanoidRootPart") then
                 local tHRP = tPlayer.Character.HumanoidRootPart
                 local myHRP = LP.Character.HumanoidRootPart
-                local angle = tick() * Config.FlySpeed * 0.1
+                
+                local angle = tick() * (Config.FlySpeed * 0.1)
                 local targetPos = tHRP.Position + Vector3.new(math.cos(angle) * Config.FlyRadius, Config.FlyHeight, math.sin(angle) * Config.FlyRadius)
+                
                 BodyGyro.CFrame = CFrame.new(myHRP.Position, tHRP.Position)
                 BodyVelocity.Velocity = (targetPos - myHRP.Position) * 10
             end
         end
         
-        -- 4. FLING VÀ AUTO-RESET ĐỔI MỤC TIÊU KHI ĐỊCH CHẾT (ĐỘC LẬP)
+        -- 4. FLING AUTO-RESET (GIỮ NGUYÊN)
         if Config.FlingActive and FlingSpin and Config.FlingTarget ~= "" then
             local tPlayer = Players:FindFirstChild(Config.FlingTarget)
             if tPlayer and tPlayer.Character and tPlayer.Character:FindFirstChild("Humanoid") then
                 if tPlayer.Character.Humanoid.Health <= 0 then
-                    -- Địch đã chết -> Tự động tìm mục tiêu mới để tiếp tục Fling
                     for _, nextPlayer in pairs(Players:GetPlayers()) do
                         if nextPlayer ~= LP and nextPlayer.Name ~= tPlayer.Name and nextPlayer.Character and nextPlayer.Character:FindFirstChild("Humanoid") and nextPlayer.Character.Humanoid.Health > 0 then
                             Config.FlingTarget = nextPlayer.Name
-                            Rayfield:Notify({Title = "Fling Auto-Reset", Content = "Địch đã chết! Tự động chuyển Fling sang: " .. nextPlayer.Name, Duration = 2})
+                            Rayfield:Notify({Title = "Fling Auto-Reset", Content = "Mục tiêu đã chết! Chuyển Fling sang: " .. nextPlayer.Name, Duration = 2})
                             break
                         end
                     end
                 else
-                    -- Di chuyển đâm thẳng vào địch
                     LP.Character.HumanoidRootPart.CFrame = tPlayer.Character.HumanoidRootPart.CFrame
                 end
             end
